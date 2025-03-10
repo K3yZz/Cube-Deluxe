@@ -32,7 +32,7 @@ const skills = [
     description: "Deal +1 damage",
     drawLinesTo: ["More Atk Speed"],
     hoveringOverSkill: false,
-    unlocked: true,
+    unlocked: false,
   },
   {
     name: "More Atk Speed",
@@ -43,7 +43,7 @@ const skills = [
     description: "Increase Attack Speed",
     drawLinesTo: [""],
     hoveringOverSkill: false,
-    unlocked: true,
+    unlocked: false,
   },
   {
     name: "Placeholder",
