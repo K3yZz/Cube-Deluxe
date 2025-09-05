@@ -1,38 +1,55 @@
 import { drawEnemy } from "./enemy.js";
 import { playerStats, player } from "./player.js";
 import { spaceTime } from "./main.js";
-import { drawSkillTree, position } from "./skilltree.js";
+import { drawDeathOverlay, position } from "./skilltree.js";
 
-let timerInterval, healthInterval, smallSquaresInterval;
+let timerInterval, healthInterval, smallSquaresInterval, mediumSquaresInterval, checkIfTabInterval;
 
 export function startIntervals() {
     //timer
     timerInterval = setInterval(() => {
-        player.time += 1;
+        if (!spaceTime.offTab) {
+            player.time += 1;
+        }
+    }, 1000);
+
+    //check if the tab is open
+    checkIfTabInterval = setInterval(() => {
+        if (document.visibilityState === "visible") {
+            spaceTime.offTab = false;
+        } else {
+            spaceTime.offTab = true;
+        }
     }, 1000);
 
     //decrease player health
     healthInterval = setInterval(() => {
-        playerStats.health -= 0.01;
+        if (!spaceTime.offTab) {
+            playerStats.health -= 0.01;
 
-        if (playerStats.health <= 0) {
-            console.log("player health is 0");
-            drawSkillTree();
-            position[0] = player.centerX;
-            position[1] = player.centerY;
-            spaceTime.paused = true;
-            stopIntervals();
+            if (playerStats.health <= 0) {
+                console.log("player health is 0");
+                drawDeathOverlay();
+                position[0] = player.centerX;
+                position[1] = player.centerY;
+                spaceTime.paused = true;
+                stopIntervals();
+            }
         }
     }, 10);
 
     //spawn small squares
     smallSquaresInterval = setInterval(() => {
-        drawEnemy("square", 1, 50);
+        if (!spaceTime.offTab) {
+            drawEnemy("square", 1, 50);
+        }
     }, 1000);
 
     //spawn medium squares
-    smallSquaresInterval = setInterval(() => {
-        drawEnemy("square", 1, 100);
+    mediumSquaresInterval = setInterval(() => {
+        if (!spaceTime.offTab) {
+            drawEnemy("square", 1, 100);
+        }
     }, 1500);
 }
 
@@ -40,4 +57,5 @@ export function stopIntervals() {
     clearInterval(timerInterval);
     clearInterval(healthInterval);
     clearInterval(smallSquaresInterval);
+    clearInterval(mediumSquaresInterval);
 }

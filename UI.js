@@ -1,4 +1,4 @@
-let backgroundCanvas, playerCanvas, skillTreeCanvas, enemyCanvas, statsCanvas;
+let backgroundCanvas, playerCanvas, skillTreeCanvas, enemyCanvas, statsCanvas, deathOverlay;
 
 export function loadBackgroundCanvas() {
     backgroundCanvas = document.createElement('canvas');
@@ -72,7 +72,7 @@ export function loadSkillTreeCanvas() {
     skillTreeCanvas.height = window.innerHeight;
 
     skillTreeCanvas.style.position = 'absolute';
-    skillTreeCanvas.style.zIndex = '-999';
+    skillTreeCanvas.style.zIndex = '-999'; //3
 
     skillTreeCanvas.id = 'skillTreeCanvas';
     
@@ -98,6 +98,39 @@ export function loadStatsCanvas() {
 
     document.body.appendChild(statsCanvas);
     return statsCanvas;
+}
+
+export function loadDeathOverlay() {
+    deathOverlay = document.createElement('canvas');
+    deathOverlay.width = window.innerWidth;
+    deathOverlay.height = window.innerHeight;
+    deathOverlay.style.position = "absolute";
+
+    deathOverlay.style.zIndex = '-999'; //5
+
+    deathOverlay.id = 'deathOverlay';
+    
+    deathOverlay.style.pointerEvents = 'none';
+
+    deathOverlay.style.backgroundColor = "transparent";
+
+    function drawScanlines() {
+        const ctx = deathOverlay.getContext('2d');
+
+        const lineHeight = 2;
+        const lineSpacing = 2;
+
+        for (let y = 0; y < window.innerHeight; y += (lineHeight + lineSpacing)) {
+            ctx.fillStyle = 'rgba(11, 200, 233, 0.28)';
+            ctx.fillRect(0, y, window.innerWidth, lineHeight);
+        }
+    }
+
+    drawScanlines();
+    window.addEventListener('resize', drawScanlines);
+
+    document.body.appendChild(deathOverlay);
+    return deathOverlay;
 }
 
 window.addEventListener('resize', () => {

@@ -2,19 +2,20 @@ import { drawEnemy, moveEnemy, enemy, moneyItem } from "./enemy.js";
 import { drawPlayer, drawPlayerHealthBar, drawTimer, player, playerStats, scaleBackground, scaleTimeoutId } from "./player.js";
 import { checkCollision, checkCollisionWithCashCashMoney } from "./collision.js";
 import { startIntervals, stopIntervals } from "./interval.js";
-import { loadBackgroundCanvas } from "./UI.js";
-import { editButton } from "./skilltree.js";
-import { drawDisplay, drawDisplayMoney } from "./loadMoneyIcon.js";
+import { loadBackgroundCanvas, loadDeathOverlay } from "./UI.js";
+import { editButton, startButton, toSkillTreeButton, againButton } from "./skilltree.js";
+import { drawDisplay } from "./loadMoneyIcon.js";
 
 //*load backdrop
 loadBackgroundCanvas();
+loadDeathOverlay();
 drawDisplay();
 
-//*bah its space and time!
-
+//*its space and time
 export const spaceTime = {
     ranOnce: false,
     paused: false,
+    offTab: false,
 };
 
 //*woah its only run once!
@@ -30,7 +31,7 @@ function runOnce() {
 let gameLoopId;
 //*run game loop
 function gameLoop() {
-    if (!spaceTime.paused) {
+    if (!spaceTime.paused || spaceTime.offTab) {
         runOnce();
         drawPlayer();
         drawPlayerHealthBar();
@@ -56,16 +57,22 @@ export function startGame() {
     document.body.style.padding = '0';
 
     const skillTreeCanvas = document.getElementById("skillTreeCanvas");
-    skillTreeCanvas.style.zIndex = "-10";
+    skillTreeCanvas.style.zIndex = "-999";
     skillTreeCanvas.style.cursor = "none";
     skillTreeCanvas.style.pointerEvents = "none";
+    const deathOverlay = document.getElementById("deathOverlay");
+    deathOverlay.style.zIndex = "-999";
+    deathOverlay.style.cursor = "none";
+    deathOverlay.style.pointerEvents = "none";
 
     playerStats.health = playerStats.maxHealth;
     player.time = 0;
     enemy.length = 0;
     moneyItem.length = 0;
 
-    editButton("delete");
+    editButton("delete", startButton);
+    editButton("delete", toSkillTreeButton);
+    editButton("delete", againButton);
     gameLoop();
 }
 

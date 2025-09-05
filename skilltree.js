@@ -26,11 +26,11 @@ const skills = [
   {
     name: "More Damage",
     pos: [0, -300],
-    cost: 25,
+    cost: 10,
     maxAbtainable: 4,
     amountAbtained: 0,
     description: "Deal +1 damage",
-    drawLinesTo: ["More Atk Speed"],
+    drawLinesTo: ["More Atk Speed", "More Health"],
     hoveringOverSkill: false,
     unlocked: false,
   },
@@ -46,8 +46,8 @@ const skills = [
     unlocked: false,
   },
   {
-    name: "Placeholder",
-    pos: [0, 0],
+    name: "More Health",
+    pos: [200, -500],
     cost: 0,
     maxAbtainable: 0,
     amountAbtained: 0,
@@ -68,9 +68,38 @@ export function drawSkillTree() {
   skillTreeCanvas.style.zIndex = "3";
   skillTreeCanvas.style.cursor = "auto";
   skillTreeCanvas.style.pointerEvents = "auto";
-  editButton("create");
+  editButton("create", startButton);
+  editButton("delete", toSkillTreeButton);
+  editButton("delete", againButton);
+
+  const deathOverlay = document.getElementById("deathOverlay");
+    deathOverlay.style.zIndex = "-999";
+    deathOverlay.style.cursor = "none";
+    deathOverlay.style.pointerEvents = "none";
   draw();
 }
+
+export function drawDeathOverlay() {
+  const deathOverlay = document.getElementById("deathOverlay");
+  deathOverlay.style.zIndex = "5";
+  deathOverlay.style.cursor = "auto";
+  deathOverlay.style.pointerEvents = "auto";
+  editButton("create", toSkillTreeButton);
+  editButton("create", againButton);
+
+  let opacity = 0;
+  deathOverlay.style.opacity = opacity;
+
+  const interval = setInterval(() => {
+    if (opacity < 1) {
+      opacity += 0.02;
+      if (opacity > 1) opacity = 1;
+      deathOverlay.style.opacity = opacity;
+    } else {
+      clearInterval(interval);
+    }
+  }, 16);
+};
 
 const draw = () => {
   window.requestAnimationFrame(draw);
@@ -177,44 +206,91 @@ const draw = () => {
                     console.log("buying skill");
                     //increase cost and amount
                     skill.amountAbtained += 1;
+                    playerStats.purpleMoney -= skill.cost;
                     //unlock a skill
-                    skillToUnlock = skills.find(s => s.name === "More Atk Speed");
-                    skillToUnlock.unlocked = true;
+                    skillToUnlock = ["More Atk Speed", "More Health"];
+                    skillToUnlock.forEach(name => {
+                      const skillToUnlock = skills.find(s => s.name === name);
+                      if (skillToUnlock) skillToUnlock.unlocked = true;
+                    });
                     //the action when bought
                     playerStats.strength + 1;
             }
+            document.getElementById("moneyDisplay").innerText = playerStats.purpleMoney;
         }
       }
     }
   }
 };
 
-const startButton = document.createElement("button");
-startButton.style.width = "150px";
-startButton.style.height = "70px";
-startButton.style.position = "absolute";
-startButton.style.right = "20px";
-startButton.style.bottom = "20px";
-startButton.style.border = "1px solid white";
-startButton.style.boxShadow = "0px 0px 10px white";
-startButton.style.backgroundColor = "black";
+export const startButton = document.createElement("button");
+Object.assign(startButton.style, {
+  width: "150px",
+  height: "70px",
+  position: "absolute",
+  right: "20px",
+  bottom: "20px",
+  border: "1px solid white",
+  boxShadow: "0px 0px 10px white",
+  backgroundColor: "black",
+  color: "white",
+  fontFamily: "font, arial",
+  fontSize: "16px",
+  textAlign: "center",
+  zIndex: -10,
+});
 startButton.innerText = "Deploy";
-startButton.style.color = "white";
-startButton.style.fontFamily = "font, arial";
-startButton.style.fontSize = "16px";
-startButton.style.textAlign = "center";
-startButton.style.zIndex = -10;
-startButton.onclick = function () {
-startGame();
-}
+startButton.onclick = startGame;
 
-export function editButton(type) {
-  document.body.appendChild(startButton);
+export const toSkillTreeButton = document.createElement("button");
+Object.assign(toSkillTreeButton.style, {
+  width: "150px",
+  height: "70px",
+  position: "absolute",
+  left: "40%",
+  top: "50%",
+  transform: "translate(-50%, -50%)",
+  border: "1px solid white",
+  boxShadow: "0px 0px 5px white",
+  backgroundColor: "rgba(11, 200, 233, 0.75)",
+  color: "white",
+  fontFamily: "font, arial",
+  fontSize: "16px",
+  textAlign: "center",
+  zIndex: -10,
+});
+toSkillTreeButton.innerText = "Upgrade";
+toSkillTreeButton.onclick = drawSkillTree;
+
+export const againButton = document.createElement("button");
+Object.assign(againButton.style, {
+  width: "150px",
+  height: "70px",
+  position: "absolute",
+  left: "60%",
+  top: "50%",
+  transform: "translate(-50%, -50%)",
+  border: "1px solid white",
+  boxShadow: "0px 0px 5px white",
+  backgroundColor: "rgba(11, 200, 233, 0.75)",
+  color: "white",
+  fontFamily: "font, arial",
+  fontSize: "16px",
+  textAlign: "center",
+  zIndex: -10,
+});
+againButton.innerText = "Deploy";
+againButton.onclick = startGame;
+
+export function editButton(type, button) {
+  if (!document.body.contains(button)) {
+    document.body.appendChild(button);
+  }
 
   if (type === "create") {
-    startButton.style.zIndex = 10;
+    button.style.zIndex = 10;
   } else if (type === "delete") {
-    startButton.style.zIndex = -10;
+    button.style.zIndex = -10;
   }
 };
 
