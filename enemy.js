@@ -77,7 +77,7 @@ export function moveEnemy() {
   drawEnemy("square", 0, 0);
 
   moneyItem.forEach((drop) => {
-    loadMoney(drop.x, drop.y);
+    drawMoney(drop.x, drop.y);
   });
 }
 
@@ -95,26 +95,16 @@ export function enemyDropMoney(enemy) {
   
       moneyItem.push({ x: dropX, y: dropY });
     }
-  }
+}
 
-function loadMoney(x, y) {
-  ctx.save();
-  ctx.strokeStyle = "rgb(177, 65, 177)";
-  ctx.lineWidth = 5;
-  ctx.lineCap = "round";
-  ctx.lineJoin = "round";
-  ctx.shadowColor = "rgb(177, 65, 177)";
-  ctx.shadowBlur = 10;
-
-  ctx.beginPath();
-  ctx.moveTo(x, y);
-  ctx.lineTo(x + 10, y - 10);
-  ctx.stroke();
-
-  ctx.beginPath();
-  ctx.moveTo(x + 10, y);
-  ctx.lineTo(x + 20, y - 10);
-  ctx.stroke();
-
-  ctx.restore();
+export function drawMoney(x, y, targetCtx = ctx) {
+  targetCtx.save();
+  targetCtx.beginPath();
+  targetCtx.arc(x, y, 10, 0, Math.PI * 2);
+  targetCtx.shadowColor = "rgba(255, 255, 0, 0.8)";
+  targetCtx.shadowBlur = 20;
+  targetCtx.fillStyle = "yellow";
+  targetCtx.fill();
+  targetCtx.closePath();
+  targetCtx.restore();
 }

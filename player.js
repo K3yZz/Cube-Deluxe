@@ -8,8 +8,18 @@ export const playerStats = {
     maxHealth: 10.00,
     strength: 1,
     attackSpeed: 1,
-    purpleMoney: 0,
+    damageTickRate: 10,
+    money: 0,
+    moneyThisRun: 0,
+    moneyMultiplier: 1,
     vampire: false,
+    magnet: false,
+    moneyOnHit: false,
+    vamprismBuff: false, //change to int later
+    manaMeter: false,
+    mana: 0,
+    maxMana: 100,
+    manaRegenRate: 1,
 }
 
 export const player = {

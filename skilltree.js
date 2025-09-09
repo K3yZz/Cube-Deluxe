@@ -19,26 +19,26 @@ const skills = [
     maxAbtainable: 1,
     amountAbtained: 0,
     description: "Siphon health like a vampire.",
-    drawLinesTo: ["More Damage"],
+    drawLinesTo: ["Damage Increase", "Vampirism Boost"],
     hoveringOverSkill: false,
     unlocked: true,
   },
   {
-    name: "More Damage",
+    name: "Damage Increase",
     pos: [0, -300],
-    cost: 10,
-    maxAbtainable: 4,
+    cost: 5,
+    maxAbtainable: 9,
     amountAbtained: 0,
     description: "Deal +1 damage",
-    drawLinesTo: ["More Atk Speed", "More Health"],
+    drawLinesTo: ["More Attack Speed", "More Health", "More Money", "Damage Increase II"],
     hoveringOverSkill: false,
     unlocked: false,
   },
   {
-    name: "More Atk Speed",
+    name: "More Attack Speed",
     pos: [-200, -500],
-    cost: 0,
-    maxAbtainable: 0,
+    cost: 5,
+    maxAbtainable: 4,
     amountAbtained: 0,
     description: "Increase Attack Speed",
     drawLinesTo: [""],
@@ -48,10 +48,87 @@ const skills = [
   {
     name: "More Health",
     pos: [200, -500],
+    cost: 10,
+    maxAbtainable: 4,
+    amountAbtained: 0,
+    description: "Increases max health",
+    drawLinesTo: ["Slow Damage Taken"],
+    hoveringOverSkill: false,
+    unlocked: false,
+  },
+  {
+    name: "Slow Damage Taken",
+    pos: [200, -800],
+    cost: 50,
+    maxAbtainable: 3,
+    amountAbtained: 0,
+    description: "Slows down the rate of damage taken by 10%",
+    drawLinesTo: [""],
+    hoveringOverSkill: false,
+    unlocked: false,
+  },
+  {
+    name: "More Money",
+    pos: [-200, -300],
+    cost: 50,
+    maxAbtainable: 10,
+    amountAbtained: 0,
+    description: "Gain more money from enemies",
+    drawLinesTo: ["Magnetic"],
+    hoveringOverSkill: false,
+    unlocked: false,
+  },
+  {
+    name: "Damage Increase II",
+    pos: [200, -300],
+    cost: 10,
+    maxAbtainable: 9,
+    amountAbtained: 0,
+    description: "Deal even more damage",
+    drawLinesTo: [""],
+    hoveringOverSkill: false,
+    unlocked: false,
+  },
+  {
+    name: "Magnetic",
+    pos: [-500, -300],
     cost: 0,
     maxAbtainable: 0,
     amountAbtained: 0,
-    description: "-",
+    description: "Attracts money towards you",
+    drawLinesTo: ["Close enough?"],
+    hoveringOverSkill: false,
+    unlocked: false,
+  },
+  {
+    name: "Close enough?",
+    pos: [-800, -500],
+    cost: 0,
+    maxAbtainable: 0,
+    amountAbtained: 0,
+    description: "Gives money on hit",
+    drawLinesTo: [""],
+    hoveringOverSkill: false,
+    unlocked: false,
+  },
+  {
+    name: "Vampirism Boost",
+    pos: [0, 300],
+    cost: 500,
+    maxAbtainable: 0,
+    amountAbtained: 0,
+    description: "Increases the amount healed from Vampire by 10%",
+    drawLinesTo: [""],
+    hoveringOverSkill: false,
+    unlocked: false,
+  },
+  {
+    name: "???",
+    pos: [0, -1000],
+    cost: 1000,
+    maxAbtainable: 0,
+    amountAbtained: 0,
+    description: "????",
     drawLinesTo: [""],
     hoveringOverSkill: false,
     unlocked: false,
@@ -68,14 +145,34 @@ export function drawSkillTree() {
   skillTreeCanvas.style.zIndex = "3";
   skillTreeCanvas.style.cursor = "auto";
   skillTreeCanvas.style.pointerEvents = "auto";
-  editButton("create", startButton);
-  editButton("delete", toSkillTreeButton);
-  editButton("delete", againButton);
+  editBox("create", startButton);
+  editBox("create", moneyBox);
+  editBox("delete", toSkillTreeButton);
+  editBox("delete", againButton);
+  editBox("delete", earningsBox);
 
   const deathOverlay = document.getElementById("deathOverlay");
     deathOverlay.style.zIndex = "-999";
     deathOverlay.style.cursor = "none";
     deathOverlay.style.pointerEvents = "none";
+
+  moneyBox.innerHTML = `
+    <p style="font-size: 18px; margin: 5px 0 0 0;">Money</p>
+    <div style="display: flex; align-items: center; justify-content: center;">
+      <p id="moneyDisplay" style="font-size: 14px; margin: 0;">${playerStats.money}</p>
+      <canvas id="moneyIcon" width="24" height="24" style="margin-left: 8px; vertical-align: middle;"></canvas>
+    </div>
+  `;
+
+  setTimeout(() => {
+    const iconCanvas = document.getElementById("moneyIcon");
+    if (iconCanvas) {
+      import("./enemy.js").then(({ drawMoney }) => {
+        drawMoney(12, 12, iconCanvas.getContext("2d"));
+      });
+    }
+  }, 0);
+
   draw();
 }
 
@@ -84,8 +181,28 @@ export function drawDeathOverlay() {
   deathOverlay.style.zIndex = "5";
   deathOverlay.style.cursor = "auto";
   deathOverlay.style.pointerEvents = "auto";
-  editButton("create", toSkillTreeButton);
-  editButton("create", againButton);
+  editBox("create", toSkillTreeButton);
+  editBox("create", againButton);
+  editBox("create", earningsBox);
+
+earningsBox.innerHTML = `
+  <p style="font-size: 24px; margin-top: 10px;">You Earned</p>
+  <div style="display: flex; align-items: center; justify-content: center;">
+    <span id="earningsAmount" style="font-size: 16px; margin: 10px 0;">
+      ${playerStats.moneyThisRun}
+    </span>
+    <canvas id="earningsMoneyIcon" width="24" height="24" style="margin-left: 8px; vertical-align: middle;"></canvas>
+  </div>
+`;
+
+setTimeout(() => {
+  const iconCanvas = document.getElementById("earningsMoneyIcon");
+  if (iconCanvas) {
+    import("./enemy.js").then(({ drawMoney }) => {
+      drawMoney(12, 12, iconCanvas.getContext("2d"));
+    });
+  }
+}, 0);
 
   let opacity = 0;
   deathOverlay.style.opacity = opacity;
@@ -103,7 +220,7 @@ export function drawDeathOverlay() {
 
 const draw = () => {
   window.requestAnimationFrame(draw);
-  ctx.clearRect(-1000, -1000, 10000, 10000);
+  ctx.clearRect(-2000, -2000, 100000, 100000);
 
   ctx.setTransform(1, 0, 0, 1, 0, 0);
   ctx.translate(position[0], position[1]);
@@ -112,13 +229,13 @@ const draw = () => {
     if (skill.unlocked) {
       //draw lines
       for (const to of skill.drawLinesTo) {
-        const to_skill = skills.find((skill) => skill.name == to);
-
+        const to_skill = skills.find((s) => s.name === to);
+      
         if (to_skill && to_skill.unlocked) {
           ctx.beginPath();
           ctx.moveTo(skill.pos[0], skill.pos[1]);
           ctx.lineTo(to_skill.pos[0], to_skill.pos[1]);
-          ctx.strokeStyle = "rgb(255 ,255 ,255)";
+          ctx.strokeStyle = "rgb(255,255,255)";
           ctx.lineWidth = 3;
           ctx.stroke();
         }
@@ -130,7 +247,7 @@ const draw = () => {
 
       //draws border
       let borderStrokeColor = "rgb(255, 255, 255)";
-      let affordable = skill.cost <= playerStats.purpleMoney;
+      let affordable = skill.cost <= playerStats.money;
       let boughtAll = skill.amountAbtained === skill.maxAbtainable;
 
       if (boughtAll) {
@@ -155,9 +272,16 @@ const draw = () => {
         ctx.fillRect(skill.pos[0] - 150, skill.pos[1] - 250, 300, 200);
 
         //draw name
-        ctx.font = "24px font";
-        ctx.fillStyle = "white";
         ctx.textAlign = "center";
+        let fontSize = 24;
+        ctx.font = `${fontSize}px font`;
+        let maxWidth = 280;
+
+        while (ctx.measureText(skill.name).width > maxWidth && fontSize > 10) {
+          fontSize -= 1;
+          ctx.font = `${fontSize}px font`;
+        }
+        ctx.fillStyle = "white";
         ctx.fillText(skill.name, skill.pos[0], skill.pos[1] - 215);
 
         //draw line seperating name and discription
@@ -169,7 +293,24 @@ const draw = () => {
 
         //draw discription
         ctx.font = "14px font";
-        ctx.fillText(skill.description, skill.pos[0], skill.pos[1] - 170);
+        ctx.fillStyle = "white";
+        const descLines = [];
+        const words = skill.description.split(" ");
+        let line = "";
+        const maxDescWidth = 280;
+        for (let i = 0; i < words.length; i++) {
+          const testLine = line + words[i] + " ";
+          if (ctx.measureText(testLine).width > maxDescWidth && line !== "") {
+            descLines.push(line.trim());
+            line = words[i] + " ";
+          } else {
+            line = testLine;
+          }
+        }
+        if (line) descLines.push(line.trim());
+        descLines.forEach((l, idx) => {
+          ctx.fillText(l, skill.pos[0], skill.pos[1] - 170 + idx * 18);
+        });
 
         //draw cost
         ctx.fillText(
@@ -186,37 +327,134 @@ const draw = () => {
           skill.pos[1] - 60
         );
       }
+
       if (skill.hoveringOverSkill && dragging) {
-        if (playerStats.purpleMoney >= skill.cost && skill.amountAbtained < skill.maxAbtainable) {
+        if (typeof window.skillPurchaseCooldown === "undefined") {
+          window.skillPurchaseCooldown = false;
+        }
+
+        if (playerStats.money >= skill.cost && skill.amountAbtained < skill.maxAbtainable && !window.skillPurchaseCooldown) {
             let skillToUnlock;
+            window.skillPurchaseCooldown = true;
+            setTimeout(() => {
+              window.skillPurchaseCooldown = false;
+            }, 1000);
             switch (skill.name) {
+              //^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^?
                 case "Vampire":
-                    //alert
-                    console.log("buying skill");
-                    //increase cost and amount
                     skill.amountAbtained += 1;
-                    //unlock a skill
-                    skillToUnlock = skills.find(s => s.name === "More Damage");
+
+                    skillToUnlock = skills.find(s => s.name === "Damage Increase");
                     skillToUnlock.unlocked = true;
-                    //the action when bought
+
                     playerStats.vampire = true;
-                    break;
-                case "More Damage":
-                    //alert
-                    console.log("buying skill");
-                    //increase cost and amount
+                  break;
+                //^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^?
+                case "Damage Increase":
                     skill.amountAbtained += 1;
-                    playerStats.purpleMoney -= skill.cost;
-                    //unlock a skill
-                    skillToUnlock = ["More Atk Speed", "More Health"];
+
+                    playerStats.money -= skill.cost;
+
+                    skillToUnlock = ["More Attack Speed", "More Health", "More Money", "Damage Increase II"];
                     skillToUnlock.forEach(name => {
                       const skillToUnlock = skills.find(s => s.name === name);
-                      if (skillToUnlock) skillToUnlock.unlocked = true;
-                    });
-                    //the action when bought
+                      if (skillToUnlock) skillToUnlock.unlocked = true;});
+
                     playerStats.strength + 1;
-            }
-            document.getElementById("moneyDisplay").innerText = playerStats.purpleMoney;
+                  break;
+                //^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^?
+                case "More Attack Speed":
+                    skill.amountAbtained += 1;
+
+                    playerStats.money -= skill.cost;
+
+                    //skillToUnlock = skills.find(s => s.name === "");
+                    //skillToUnlock.unlocked = true;
+
+                    playerStats.attackSpeed += 0.1;
+                  break;
+                //^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^?
+                case "More Health":
+                    skill.amountAbtained += 1;
+
+                    playerStats.money -= skill.cost;
+
+                    skillToUnlock = skills.find(s => s.name === "Slow Damage Taken");
+                    skillToUnlock.unlocked = true;
+
+                    playerStats.maxHealth += 5;
+                  break;
+                //^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^?
+                case "Slow Damage Taken":
+                    skill.amountAbtained += 1;
+
+                    playerStats.money -= skill.cost;
+
+                    //skillToUnlock = skills.find(s => s.name === "");
+                    //skillToUnlock.unlocked = true;
+
+                    playerStats.damageTickRate *= 0.9;
+                  break;
+                //^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^?
+                case "More Money":
+                    skill.amountAbtained += 1;
+
+                    playerStats.money -= skill.cost;
+
+                    skillToUnlock = skills.find(s => s.name === "Magnetic");
+                    skillToUnlock.unlocked = true;
+
+                    playerStats.moneyMultiplier += 0.1;
+                  break;
+                //^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^?
+                case "Damage Increase II":
+                    skill.amountAbtained += 1;
+
+                    playerStats.money -= skill.cost;
+
+                    //skillToUnlock = skills.find(s => s.name === "");
+                    //skillToUnlock.unlocked = true;
+
+                    playerStats.strength + 1;
+                  break;
+                //^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^?
+                case "Magnetic":
+                  skill.amountAbtained += 1;
+
+                  playerStats.money -= skill.cost;
+
+                  skillToUnlock = skills.find(s => s.name === "Close enough?");
+                  skillToUnlock.unlocked = true;
+
+                  playerStats.magnet = true;
+                  break;
+                //^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^?
+                case "Close enough?":
+                  skill.amountAbtained += 1;
+
+                  playerStats.money -= skill.cost;
+
+                  //skillToUnlock = skills.find(s => s.name === "");
+                  //skillToUnlock.unlocked = true;
+
+                  playerStats.moneyOnHit = true;
+                  break;
+                //^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^?
+                case "Vampirism Boost":
+                  skill.amountAbtained += 1;
+
+                  playerStats.money -= skill.cost;
+
+                  //skillToUnlock = skills.find(s => s.name === "");
+                  //skillToUnlock.unlocked = true;
+
+                  playerStats.vamprismBuff += 0.1;
+                  break;
+                //^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^?
+                case "???":
+                  break
+                  }
+            document.getElementById("moneyDisplay").innerText = playerStats.money;
         }
       }
     }
@@ -282,15 +520,50 @@ Object.assign(againButton.style, {
 againButton.innerText = "Deploy";
 againButton.onclick = startGame;
 
-export function editButton(type, button) {
-  if (!document.body.contains(button)) {
-    document.body.appendChild(button);
+export const earningsBox = document.createElement("div");
+Object.assign(earningsBox.style, {
+  width: "300px",
+  height: "140px",
+  position: "absolute",
+  left: "50%",
+  top: "30%",
+  transform: "translate(-50%, -50%)",
+  border: "1px solid white",
+  boxShadow: "0px 0px 5px white",
+  backgroundColor: "rgba(11, 200, 233, 0.75)",
+  color: "white",
+  fontFamily: "font, arial",
+  fontSize: "16px",
+  textAlign: "center",
+  zIndex: -10,
+});
+
+export const moneyBox = document.createElement("div");
+Object.assign(moneyBox.style, {
+  width: "140px",
+  height: "50px",
+  position: "absolute",
+  right: "20px",
+  top: "20px",
+  border: "1px solid white",
+  boxShadow: "0px 0px 5px white",
+  backgroundColor: "rgba(41, 46, 47, 1)",
+  color: "white",
+  fontFamily: "font, arial",
+  fontSize: "16px",
+  textAlign: "center",
+  zIndex: -10,
+});
+
+export function editBox(type, box) {
+  if (!document.body.contains(box)) {
+    document.body.appendChild(box);
   }
 
   if (type === "create") {
-    button.style.zIndex = 10;
+    box.style.zIndex = 10;
   } else if (type === "delete") {
-    button.style.zIndex = -10;
+    box.style.zIndex = -10;
   }
 };
 

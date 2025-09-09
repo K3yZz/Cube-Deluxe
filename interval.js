@@ -36,7 +36,7 @@ export function startIntervals() {
                 stopIntervals();
             }
         }
-    }, 10);
+    }, playerStats.damageTickRate);
 
     //spawn small squares
     smallSquaresInterval = setInterval(() => {

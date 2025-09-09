@@ -1,4 +1,4 @@
-let backgroundCanvas, playerCanvas, skillTreeCanvas, enemyCanvas, statsCanvas, deathOverlay;
+let backgroundCanvas, playerCanvas, skillTreeCanvas, enemyCanvas, deathOverlay;
 
 export function loadBackgroundCanvas() {
     backgroundCanvas = document.createElement('canvas');
@@ -82,22 +82,6 @@ export function loadSkillTreeCanvas() {
 
     document.body.appendChild(skillTreeCanvas);
     return skillTreeCanvas;
-}
-
-export function loadStatsCanvas() {
-    statsCanvas = document.createElement('canvas');
-
-    statsCanvas.width = window.innerWidth;
-    statsCanvas.height = window.innerHeight;
-    statsCanvas.style.position = "absolute";
-
-    statsCanvas.style.zIndex = '4';
-    
-    statsCanvas.style.pointerEvents = 'none';
-    statsCanvas.style.backgroundColor = "transparent";
-
-    document.body.appendChild(statsCanvas);
-    return statsCanvas;
 }
 
 export function loadDeathOverlay() {

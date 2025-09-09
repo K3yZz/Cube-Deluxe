@@ -1,15 +1,13 @@
 import { drawEnemy, moveEnemy, enemy, moneyItem } from "./enemy.js";
 import { drawPlayer, drawPlayerHealthBar, drawTimer, player, playerStats, scaleBackground, scaleTimeoutId } from "./player.js";
-import { checkCollision, checkCollisionWithCashCashMoney } from "./collision.js";
+import { checkCollision, checkCollisionWithMoney } from "./collision.js";
 import { startIntervals, stopIntervals } from "./interval.js";
 import { loadBackgroundCanvas, loadDeathOverlay } from "./UI.js";
-import { editButton, startButton, toSkillTreeButton, againButton } from "./skilltree.js";
-import { drawDisplay } from "./loadMoneyIcon.js";
+import { editBox, startButton, toSkillTreeButton, againButton } from "./skilltree.js";
 
 //*load backdrop
 loadBackgroundCanvas();
 loadDeathOverlay();
-drawDisplay();
 
 //*its space and time
 export const spaceTime = {
@@ -38,7 +36,7 @@ function gameLoop() {
         drawTimer();
         moveEnemy();
         checkCollision();
-        checkCollisionWithCashCashMoney();
+        checkCollisionWithMoney();
     }
     gameLoopId = requestAnimationFrame(gameLoop);
 }
@@ -66,13 +64,14 @@ export function startGame() {
     deathOverlay.style.pointerEvents = "none";
 
     playerStats.health = playerStats.maxHealth;
+    playerStats.moneyThisRun = 0;
     player.time = 0;
     enemy.length = 0;
     moneyItem.length = 0;
 
-    editButton("delete", startButton);
-    editButton("delete", toSkillTreeButton);
-    editButton("delete", againButton);
+    editBox("delete", startButton);
+    editBox("delete", toSkillTreeButton);
+    editBox("delete", againButton);
     gameLoop();
 }
 

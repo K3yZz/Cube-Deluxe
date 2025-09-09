@@ -29,7 +29,7 @@ export function checkCollision() {
   }
 }
 
-export function checkCollisionWithCashCashMoney() {
+export function checkCollisionWithMoney() {
     for (let i = 0; i < moneyItem.length; i++) {
         const dx = player.x - moneyItem[i].x;
         const dy = player.y - moneyItem[i].y;
@@ -37,8 +37,8 @@ export function checkCollisionWithCashCashMoney() {
     
         if (distance < player.size / 2 + 10) {
           moneyItem.splice(i, 1);
-          playerStats.purpleMoney += 1;
-          document.getElementById("moneyDisplay").innerText = playerStats.purpleMoney;
+          playerStats.money += 1 * playerStats.moneyMultiplier;
+          playerStats.moneyThisRun += 1 * playerStats.moneyMultiplier;
         }
     }
 }
