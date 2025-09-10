@@ -73,7 +73,7 @@ export function startGame() {
     editBox("delete", toSkillTreeButton);
     editBox("delete", againButton);
     editBox("delete", earningsBox);
-    editBox("delete", moneyBox)
+    editBox("delete", moneyBox);
     gameLoop();
 }
 
