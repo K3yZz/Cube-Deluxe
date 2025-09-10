@@ -6,7 +6,11 @@ const ctx = canvas.getContext("2d");
 
 export let enemy = [];
 
-export function drawEnemy(type, amount, size) {
+export function drawEnemy(type, color, amount, size) {
+  
+  if (typeof color === "string" && color.toLowerCase() === "red") color = "rgba(255, 0, 0, 1)";
+  if (typeof color === "string" && color.toLowerCase() === "purple") color = "rgba(128, 0, 128, 1)";
+
   //create enemy
   for (let i = 0; i < amount; i++) {
     enemy.push({
@@ -15,6 +19,7 @@ export function drawEnemy(type, amount, size) {
       size: size,
       type: type,
       health: size * 0.06,
+      color: color,
       rotation: 0,
       hit: false,
     });
@@ -30,7 +35,7 @@ export function drawEnemy(type, amount, size) {
 
       ctx.beginPath();
       ctx.rect(e.x, e.y, e.size + 10, e.size + 10);
-      ctx.strokeStyle = "rgb(255, 0, 0)";
+      ctx.strokeStyle = e.color;
       ctx.lineWidth = 2;
       ctx.stroke();
       ctx.closePath();
@@ -38,8 +43,13 @@ export function drawEnemy(type, amount, size) {
       //health display
       ctx.beginPath();
       ctx.rect(e.x + 5, e.y + 5, e.size, e.health / 0.06);
-      ctx.fillStyle = "rgb(255, 0, 0)";
-      ctx.shadowColor = "rgba(250, 31, 31, 0.8)";
+      ctx.fillStyle = e.color;
+      let rgb = [255, 0, 0];
+      if (typeof e.color === "string" && e.color.startsWith("rgba")) {
+        rgb = e.color.match(/\d+/g).map(Number);
+      }
+      const secondColor = `rgba(${Math.max(rgb[0] - 5, 0)}, ${Math.min(rgb[1] + 31, 255)}, ${Math.min(rgb[2] + 31, 255)}, 0.8)`;
+      ctx.shadowColor = secondColor; 
       ctx.shadowBlur = 20;
       ctx.fill();
       ctx.closePath();

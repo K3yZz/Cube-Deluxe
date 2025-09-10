@@ -19,7 +19,7 @@ export const spaceTime = {
 //*woah its only run once!
 function runOnce() {
     if(!spaceTime.ranOnce) {
-        drawEnemy('square', 1, 50);
+        drawEnemy('square', "red", 1, 50);
         startIntervals();
         scaleBackground();
         spaceTime.ranOnce = true;

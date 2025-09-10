@@ -2,12 +2,24 @@ import { enemy, enemyDropMoney, moneyItem } from "./enemy.js";
 import { player, playerStats } from "./player.js";
 
 export function checkCollision() {
-  for (let i = 0; i < enemy.length; i++) {
-    const dx = player.x - (enemy[i].x + enemy[i].size / 2);
-    const dy = player.y - (enemy[i].y + enemy[i].size / 2);
-    const distance = Math.sqrt(dx * dx + dy * dy);
+  for (let i = enemy.length - 1; i >= 0; i--) {
+    const playerLeft = player.x - player.size / 2;
+    const playerRight = player.x + player.size / 2;
+    const playerTop = player.y - player.size / 2;
+    const playerBottom = player.y + player.size / 2;
 
-    if (distance < player.size / 2 + enemy[i].size / 2) {
+    const enemyLeft = enemy[i].x;
+    const enemyRight = enemy[i].x + enemy[i].size;
+    const enemyTop = enemy[i].y;
+    const enemyBottom = enemy[i].y + enemy[i].size;
+
+    const isColliding =
+      playerRight > enemyLeft &&
+      playerLeft < enemyRight &&
+      playerBottom > enemyTop &&
+      playerTop < enemyBottom;
+
+    if (isColliding) {
       if (player.backgroundScalingOpacity >= 1) {
         if (!enemy[i].hit) {
           enemy[i].health -= playerStats.strength;
@@ -19,8 +31,8 @@ export function checkCollision() {
       }
 
       if (enemy[i].health <= 0) {
-        enemy.splice(i, 1);
         enemyDropMoney(enemy[i]);
+        enemy.splice(i, 1);
         if (playerStats.vampire) {
           playerStats.health = Math.min(playerStats.health + 1, playerStats.maxHealth);
         }

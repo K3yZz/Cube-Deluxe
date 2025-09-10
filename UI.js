@@ -117,6 +117,26 @@ export function loadDeathOverlay() {
     return deathOverlay;
 }
 
+export function loadDramaticText() {
+    const dramaticText = document.createElement('div');
+    dramaticText.id = 'dramaticText';
+    dramaticText.style.position = 'absolute';
+    dramaticText.style.top = '50%';
+    dramaticText.style.left = '50%';
+    dramaticText.style.transform = 'translate(-50%, -50%)';
+    dramaticText.style.fontFamily = 'Arial, sans-serif';
+    dramaticText.style.fontSize = '48px';
+    dramaticText.style.color = 'white';
+    dramaticText.style.textAlign = 'center';
+    dramaticText.style.zIndex = '20';
+    dramaticText.style.pointerEvents = 'none';
+    dramaticText.style.opacity = '0';
+    dramaticText.style.transition = 'opacity 0.5s ease-in-out';
+    
+    document.body.appendChild(dramaticText);
+    return dramaticText;
+}
+
 window.addEventListener('resize', () => {
     if (backgroundCanvas && playerCanvas) {
         backgroundCanvas.width = playerCanvas.width = window.innerWidth;

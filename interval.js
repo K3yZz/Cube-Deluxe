@@ -3,7 +3,7 @@ import { playerStats, player } from "./player.js";
 import { spaceTime } from "./main.js";
 import { drawDeathOverlay, position } from "./skilltree.js";
 
-let timerInterval, healthInterval, smallSquaresInterval, mediumSquaresInterval, checkIfTabInterval;
+let timerInterval, healthInterval, smallSquaresInterval, mediumSquaresInterval, bossSquare1Interval, checkIfTabInterval;
 
 export function startIntervals() {
     //timer
@@ -41,16 +41,22 @@ export function startIntervals() {
     //spawn small squares
     smallSquaresInterval = setInterval(() => {
         if (!spaceTime.offTab) {
-            drawEnemy("square", 1, 50);
+            drawEnemy("square", "red", 1, 50);
         }
     }, 1000);
 
     //spawn medium squares
     mediumSquaresInterval = setInterval(() => {
         if (!spaceTime.offTab) {
-            drawEnemy("square", 1, 100);
+            drawEnemy("square", "red", 1, 100);
         }
     }, 1500);
+
+    bossSquare1Interval = setInterval(() => {
+        if (!spaceTime.offTab && player.time === 30) {
+            drawEnemy("square", "purple", 1, 200);
+        }
+    }, 100);
 }
 
 export function stopIntervals() {
@@ -58,4 +64,5 @@ export function stopIntervals() {
     clearInterval(healthInterval);
     clearInterval(smallSquaresInterval);
     clearInterval(mediumSquaresInterval);
+    clearInterval(bossSquare1Interval);
 }

@@ -38,7 +38,7 @@ const skills = [
     name: "More Attack Speed",
     pos: [-200, -500],
     cost: 5,
-    maxAbtainable: 4,
+    maxAbtainable: 5,
     amountAbtained: 0,
     description: "Increase Attack Speed",
     drawLinesTo: [""],
@@ -360,7 +360,7 @@ const draw = () => {
                       const skillToUnlock = skills.find(s => s.name === name);
                       if (skillToUnlock) skillToUnlock.unlocked = true;});
 
-                    playerStats.strength + 1;
+                    playerStats.strength += 1;
                   break;
                 //^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^?
                 case "More Attack Speed":
@@ -371,7 +371,7 @@ const draw = () => {
                     //skillToUnlock = skills.find(s => s.name === "");
                     //skillToUnlock.unlocked = true;
 
-                    playerStats.attackSpeed += 0.1;
+                    playerStats.attackSpeed -= 0.1;
                   break;
                 //^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^?
                 case "More Health":
@@ -415,7 +415,7 @@ const draw = () => {
                     //skillToUnlock = skills.find(s => s.name === "");
                     //skillToUnlock.unlocked = true;
 
-                    playerStats.strength + 1;
+                    playerStats.strength += 1;
                   break;
                 //^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^?
                 case "Magnetic":
