@@ -3,7 +3,7 @@ import { drawPlayer, drawPlayerHealthBar, drawTimer, player, playerStats, scaleB
 import { checkCollision, checkCollisionWithMoney } from "./collision.js";
 import { startIntervals, stopIntervals } from "./interval.js";
 import { loadBackgroundCanvas, loadDeathOverlay } from "./UI.js";
-import { editBox, startButton, toSkillTreeButton, againButton } from "./skilltree.js";
+import { editBox, startButton, toSkillTreeButton, againButton, earningsBox } from "./skilltree.js";
 
 //*load backdrop
 loadBackgroundCanvas();
@@ -72,6 +72,7 @@ export function startGame() {
     editBox("delete", startButton);
     editBox("delete", toSkillTreeButton);
     editBox("delete", againButton);
+    editBox("delete", earningsBox);
     gameLoop();
 }
 
