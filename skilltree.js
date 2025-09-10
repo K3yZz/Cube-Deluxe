@@ -150,6 +150,7 @@ export function drawSkillTree() {
   editBox("delete", toSkillTreeButton);
   editBox("delete", againButton);
   editBox("delete", earningsBox);
+  editBox("delete", tipBox);
 
   const deathOverlay = document.getElementById("deathOverlay");
     deathOverlay.style.zIndex = "-999";
@@ -184,6 +185,7 @@ export function drawDeathOverlay() {
   editBox("create", toSkillTreeButton);
   editBox("create", againButton);
   editBox("create", earningsBox);
+  editBox("create", tipBox);
 
 earningsBox.innerHTML = `
   <p style="font-size: 24px; margin-top: 10px;">You Earned</p>
@@ -217,6 +219,17 @@ setTimeout(() => {
     }
   }, 16);
 };
+
+function randomTipGenerator() {
+  const tips = [
+    "Tip: You can drag the skill tree around!",
+    "Tip: git gud",
+    "Tip: Vampire is free",
+    "Tip: you poor...",
+  ];
+  const randomIndex = Math.floor(Math.random() * tips.length);
+  return tips[randomIndex];
+}
 
 const draw = () => {
   window.requestAnimationFrame(draw);
@@ -537,6 +550,25 @@ Object.assign(earningsBox.style, {
   textAlign: "center",
   zIndex: -10,
 });
+
+export const tipBox = document.createElement("div");
+Object.assign(tipBox.style, {
+  width: "300px",
+  height: "30px",
+  position: "absolute",
+  left: "50%",
+  top: "90%",
+  transform: "translate(-50%, -50%)",
+  border: "1px solid white",
+  boxShadow: "0px 0px 5px white",
+  backgroundColor: "rgba(11, 200, 233, 0.75)",
+  color: "white",
+  fontFamily: "font, arial",
+  fontSize: "16px",
+  textAlign: "center",
+  zIndex: -10,
+});
+tipBox.innerText = randomTipGenerator();
 
 export const moneyBox = document.createElement("div");
 Object.assign(moneyBox.style, {

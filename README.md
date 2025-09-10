@@ -1,13 +1,11 @@
 # Cube-Deluxe
 Major-Minor-Patch
-V1.3.4-alpha
+V1.3.5-alpha
 
 
 todo:
 
-- Fix hitboxes (SOMEWHAT FIXED KINDA)
 - Add more skills to game
     - add bigger player hitbox upgrade
 - Make skill tree look better
-- Finish deathoverlay
-    - add tips like "Tip: git gud"
+- fix money not randomly being places around the map

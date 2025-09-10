@@ -2,6 +2,7 @@ import { drawEnemy } from "./enemy.js";
 import { playerStats, player } from "./player.js";
 import { spaceTime } from "./main.js";
 import { drawDeathOverlay, position } from "./skilltree.js";
+import { loadDramaticText } from "./UI.js";
 
 let timerInterval, healthInterval, smallSquaresInterval, mediumSquaresInterval, bossSquare1Interval, checkIfTabInterval;
 
@@ -54,6 +55,7 @@ export function startIntervals() {
 
     bossSquare1Interval = setInterval(() => {
         if (!spaceTime.offTab && player.time === 30) {
+            loadDramaticText();
             drawEnemy("square", "purple", 1, 200);
         }
     }, 100);

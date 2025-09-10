@@ -121,19 +121,34 @@ export function loadDramaticText() {
     const dramaticText = document.createElement('div');
     dramaticText.id = 'dramaticText';
     dramaticText.style.position = 'absolute';
-    dramaticText.style.top = '50%';
+    dramaticText.style.top = '25%';
     dramaticText.style.left = '50%';
     dramaticText.style.transform = 'translate(-50%, -50%)';
-    dramaticText.style.fontFamily = 'Arial, sans-serif';
+    dramaticText.style.fontFamily = 'font, sans-serif';
     dramaticText.style.fontSize = '48px';
-    dramaticText.style.color = 'white';
+    dramaticText.style.color = 'rgba(255, 0, 0, 1)';
+    dramaticText.style.textShadow = '4px 4px 4px rgba(147, 16, 16, 0.7)';
+    dramaticText.style.fontWeight = 'bold';
     dramaticText.style.textAlign = 'center';
     dramaticText.style.zIndex = '20';
     dramaticText.style.pointerEvents = 'none';
     dramaticText.style.opacity = '0';
-    dramaticText.style.transition = 'opacity 0.5s ease-in-out';
+
+    dramaticText.innerText = 'Big Cube';
     
     document.body.appendChild(dramaticText);
+
+    dramaticText.style.transition = 'opacity 1s ease-in-out';
+
+     requestAnimationFrame(() => {
+        dramaticText.style.opacity = '1';
+    });
+
+    setTimeout(() => {
+        dramaticText.style.opacity = '0';
+    }, 3000);
+    
+
     return dramaticText;
 }
 
