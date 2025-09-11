@@ -117,7 +117,7 @@ export function loadDeathOverlay() {
     return deathOverlay;
 }
 
-export function loadDramaticText() {
+export function loadDramaticText(text) {
     const dramaticText = document.createElement('div');
     dramaticText.id = 'dramaticText';
     dramaticText.style.position = 'absolute';
@@ -134,7 +134,7 @@ export function loadDramaticText() {
     dramaticText.style.pointerEvents = 'none';
     dramaticText.style.opacity = '0';
 
-    dramaticText.innerText = 'Big Cube';
+    dramaticText.innerText = text;
     
     document.body.appendChild(dramaticText);
 

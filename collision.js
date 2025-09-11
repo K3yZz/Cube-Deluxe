@@ -19,22 +19,26 @@ export function checkCollision() {
       playerBottom > enemyTop &&
       playerTop < enemyBottom;
 
-    if (isColliding) {
-      if (player.backgroundScalingOpacity >= 1) {
-        if (!enemy[i].hit) {
-          enemy[i].health -= playerStats.strength;
-          enemy[i].hit = true;
-          setTimeout(() => {
-            enemy[i].hit = false;
-          }, playerStats.attackSpeed * 1000);
-        }
+    if (isColliding && player.backgroundScalingOpacity >= 1) {
+      const now = performance.now();
+
+      if (
+        !enemy[i].lastHitTime ||
+        now - enemy[i].lastHitTime >= playerStats.attackSpeed * 1000
+      ) {
+        enemy[i].health -= playerStats.strength;
+        enemy[i].lastHitTime = now;
       }
 
       if (enemy[i].health <= 0) {
         enemyDropMoney(enemy[i]);
         enemy.splice(i, 1);
+
         if (playerStats.vampire) {
-          playerStats.health = Math.min(playerStats.health + 1, playerStats.maxHealth);
+          playerStats.health = Math.min(
+            playerStats.health + 1,
+            playerStats.maxHealth
+          );
         }
       }
     }

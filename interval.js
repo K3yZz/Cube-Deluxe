@@ -4,7 +4,7 @@ import { spaceTime } from "./main.js";
 import { drawDeathOverlay, position } from "./skilltree.js";
 import { loadDramaticText } from "./UI.js";
 
-let timerInterval, healthInterval, smallSquaresInterval, mediumSquaresInterval, bossSquare1Interval, checkIfTabInterval;
+let timerInterval, healthInterval, smallSquaresInterval, mediumSquaresInterval, bossSquareInterval, checkIfTabInterval;
 
 export function startIntervals() {
     //timer
@@ -42,23 +42,24 @@ export function startIntervals() {
     //spawn small squares
     smallSquaresInterval = setInterval(() => {
         if (!spaceTime.offTab) {
-            drawEnemy("square", "red", 1, 50);
+            drawEnemy("square", "red", 1, 50, 3);
         }
     }, 1000);
 
     //spawn medium squares
     mediumSquaresInterval = setInterval(() => {
         if (!spaceTime.offTab) {
-            drawEnemy("square", "red", 1, 100);
+            drawEnemy("square", "red", 1, 100, 6);
         }
     }, 1500);
 
-    bossSquare1Interval = setInterval(() => {
+    bossSquareInterval = setInterval(() => {
+        //first boss
         if (!spaceTime.offTab && player.time === 30) {
-            loadDramaticText();
-            drawEnemy("square", "purple", 1, 200);
+            loadDramaticText("Big Cube");
+            drawEnemy("square", "purple", 1, 300, 20);
         }
-    }, 100);
+    }, 1000);
 }
 
 export function stopIntervals() {
@@ -66,5 +67,5 @@ export function stopIntervals() {
     clearInterval(healthInterval);
     clearInterval(smallSquaresInterval);
     clearInterval(mediumSquaresInterval);
-    clearInterval(bossSquare1Interval);
+    clearInterval(bossSquareInterval);
 }

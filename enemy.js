@@ -6,26 +6,26 @@ const ctx = canvas.getContext("2d");
 
 export let enemy = [];
 
-export function drawEnemy(type, color, amount, size) {
-  
+export function drawEnemy(type, color, amount, size, maxHealth) {
   if (typeof color === "string" && color.toLowerCase() === "red") color = "rgba(255, 0, 0, 1)";
   if (typeof color === "string" && color.toLowerCase() === "purple") color = "rgba(128, 0, 128, 1)";
 
-  //create enemy
+  // create enemies
   for (let i = 0; i < amount; i++) {
     enemy.push({
       x: Math.random() * canvas.width,
       y: Math.random() * canvas.height,
-      size: size,
-      type: type,
-      health: size * 0.06,
-      color: color,
+      size,
+      type,
+      health: maxHealth,
+      maxHealth,
+      color,
       rotation: 0,
-      hit: false,
+      lastHitTime: 0,
     });
   }
 
-  //draw enemy
+  // draw enemies
   if (type === "square") {
     enemy.forEach((e) => {
       ctx.save();
@@ -33,6 +33,7 @@ export function drawEnemy(type, color, amount, size) {
       ctx.rotate(e.rotation);
       ctx.translate(-e.x - e.size / 2, -e.y - e.size / 2);
 
+      // outer enemy
       ctx.beginPath();
       ctx.rect(e.x, e.y, e.size + 10, e.size + 10);
       ctx.strokeStyle = e.color;
@@ -40,16 +41,20 @@ export function drawEnemy(type, color, amount, size) {
       ctx.stroke();
       ctx.closePath();
 
-      //health display
+      // inner health cube
+      const healthPercent = e.health / e.maxHealth;
+      const innerHeight = e.size * healthPercent;
+
       ctx.beginPath();
-      ctx.rect(e.x + 5, e.y + 5, e.size, e.health / 0.06);
+      ctx.rect(e.x + 5, e.y + (e.size - innerHeight) + 5, e.size, innerHeight);
       ctx.fillStyle = e.color;
+
       let rgb = [255, 0, 0];
       if (typeof e.color === "string" && e.color.startsWith("rgba")) {
         rgb = e.color.match(/\d+/g).map(Number);
       }
       const secondColor = `rgba(${Math.max(rgb[0] - 5, 0)}, ${Math.min(rgb[1] + 31, 255)}, ${Math.min(rgb[2] + 31, 255)}, 0.8)`;
-      ctx.shadowColor = secondColor; 
+      ctx.shadowColor = secondColor;
       ctx.shadowBlur = 20;
       ctx.fill();
       ctx.closePath();
@@ -98,7 +103,7 @@ export function enemyDropMoney(enemy) {
   
     for (let i = 0; i < numDrops; i++) {
       const angle = Math.random() * Math.PI * 2;
-      const distance = Math.random() * 20 + 1;
+      const distance = Math.random() * 200;
   
       const dropX = enemy.x + Math.cos(angle) * distance;
       const dropY = enemy.y + Math.sin(angle) * distance;
