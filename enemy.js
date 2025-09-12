@@ -98,8 +98,9 @@ export function moveEnemy() {
 
 export let moneyItem = [];
 
+// MODIFIED TEST PLEASE VVV
 export function enemyDropMoney(enemy) {
-    const numDrops = Math.floor(Math.random() * 3) + 2;
+    const numDrops = Math.floor(Math.random() * (enemy.maxHealth / 1.5)) + (enemy.maxHealth - 2);
   
     for (let i = 0; i < numDrops; i++) {
       const angle = Math.random() * Math.PI * 2;

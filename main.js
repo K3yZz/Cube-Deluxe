@@ -79,3 +79,9 @@ export function startGame() {
 }
 
 startGame();
+
+document.addEventListener("keydown", (e) => {
+  if (e.key === "y") {
+    playerStats.health = 0;
+  }
+});

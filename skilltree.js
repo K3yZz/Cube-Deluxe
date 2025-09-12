@@ -22,6 +22,7 @@ const skills = [
     drawLinesTo: ["Damage Increase", "Vampirism Boost"],
     hoveringOverSkill: false,
     unlocked: true,
+    costInflation: null,
   },
   {
     name: "Damage Increase",
@@ -33,6 +34,7 @@ const skills = [
     drawLinesTo: ["More Attack Speed", "More Health", "More Money", "Damage Increase II"],
     hoveringOverSkill: false,
     unlocked: false,
+    costInflation: 2.33,
   },
   {
     name: "More Attack Speed",
@@ -44,6 +46,7 @@ const skills = [
     drawLinesTo: [""],
     hoveringOverSkill: false,
     unlocked: false,
+    costInflation: 2.33,
   },
   {
     name: "More Health",
@@ -55,6 +58,7 @@ const skills = [
     drawLinesTo: ["Slow Damage Taken"],
     hoveringOverSkill: false,
     unlocked: false,
+    costInflation: 2.33,
   },
   {
     name: "Slow Damage Taken",
@@ -66,6 +70,7 @@ const skills = [
     drawLinesTo: [""],
     hoveringOverSkill: false,
     unlocked: false,
+    costInflation: 3,
   },
   {
     name: "More Money",
@@ -77,50 +82,55 @@ const skills = [
     drawLinesTo: ["Magnetic"],
     hoveringOverSkill: false,
     unlocked: false,
+    costInflation: 3.33,
   },
   {
     name: "Damage Increase II",
     pos: [200, -300],
     cost: 100,
-    maxAbtainable: 9,
+    maxAbtainable: 5,
     amountAbtained: 0,
     description: "Deal even more damage",
     drawLinesTo: [""],
     hoveringOverSkill: false,
     unlocked: false,
+    costInflation: 3.5,
   },
   {
     name: "Magnetic",
     pos: [-500, -300],
     cost: 0,
-    maxAbtainable: 0,
+    maxAbtainable: 1,
     amountAbtained: 0,
     description: "Attracts money towards you",
     drawLinesTo: ["Close enough?"],
     hoveringOverSkill: false,
     unlocked: false,
+    costInflation: null,
   },
   {
     name: "Close enough?",
     pos: [-800, -500],
     cost: 0,
-    maxAbtainable: 0,
+    maxAbtainable: 1,
     amountAbtained: 0,
     description: "Gives money on hit",
     drawLinesTo: [""],
     hoveringOverSkill: false,
     unlocked: false,
+    costInflation: null,
   },
   {
     name: "Vampirism Boost",
     pos: [0, 300],
     cost: 500,
-    maxAbtainable: 0,
+    maxAbtainable: 3,
     amountAbtained: 0,
     description: "Increases the amount healed from Vampire by 10%",
     drawLinesTo: [""],
     hoveringOverSkill: false,
     unlocked: false,
+    costInflation: 3.66,
   },
   {
     name: "???",
@@ -132,6 +142,7 @@ const skills = [
     drawLinesTo: [""],
     hoveringOverSkill: false,
     unlocked: false,
+    costInflation: 999999,
   },
 ];
 
@@ -225,7 +236,9 @@ function randomTipGenerator() {
     'Tip: You can drag the skill tree around!',
     'Tip: "git gud" - Hornet',
     'Tip: Vampire was free',
-    'Tip: youre poor...',
+    "Tip: you're poor...",
+    'Tip: WASD to move the skill tree',
+    'Tip: Pressing Y lets you leave the match',
   ];
   const randomIndex = Math.floor(Math.random() * tips.length);
   return tips[randomIndex];
@@ -344,26 +357,22 @@ const draw = () => {
           window.skillPurchaseCooldown = true;
           setTimeout(() => {
             window.skillPurchaseCooldown = false;
-          }, 1000);
+          }, 500);
 
           switch (skill.name) {
             case "Vampire":
-              skill.amountAbtained += 1;
               skillToUnlock = skills.find(s => s.name === "Damage Increase");
               skillToUnlock.unlocked = true;
               playerStats.vampire = true;
               break;
             case "Damage Increase":
-              skill.amountAbtained += 1;
-              playerStats.money -= skill.cost;
-              skill.cost = Math.floor(skill.cost * 1.5);
               skillToUnlock = ["More Attack Speed", "More Health", "More Money", "Damage Increase II"];
               skillToUnlock.forEach(name => {
                 const s = skills.find(sk => sk.name === name);
                 if (s.name == "Damage Increase II") {
-                  if (skill.amountAbtained === 9) s.unlocked = true;
+                  if (skill.amountAbtained === 4) s.unlocked = true;
                 } else if (s.name == "More Money") {
-                  if (skill.amountAbtained === 5) s.unlocked = true;
+                  if (skill.amountAbtained === 2) s.unlocked = true;
                 } else if (s.name == "More Health" || s.name == "More Attack Speed") {
                   s.unlocked = true;
                 }
@@ -371,59 +380,43 @@ const draw = () => {
               playerStats.strength += 1;
               break;
             case "More Attack Speed":
-              skill.amountAbtained += 1;
-              playerStats.money -= skill.cost;
-              skill.cost = Math.floor(skill.cost * 1.5);
               playerStats.attackSpeed -= 0.1;
               break;
             case "More Health":
-              skill.amountAbtained += 1;
-              playerStats.money -= skill.cost;
-              skill.cost = Math.floor(skill.cost * 1.5);
               skillToUnlock = skills.find(s => s.name === "Slow Damage Taken");
               if (skill.amountAbtained == 4) skillToUnlock.unlocked = true;
               playerStats.maxHealth += 5;
               break;
             case "Slow Damage Taken":
-              skill.amountAbtained += 1;
-              playerStats.money -= skill.cost;
-              skill.cost = Math.floor(skill.cost * 1.5);
               playerStats.damageTickRate *= 0.9;
               break;
             case "More Money":
-              skill.amountAbtained += 1;
-              playerStats.money -= skill.cost;
-              skill.cost = Math.floor(skill.cost * 1.5);
               skillToUnlock = skills.find(s => s.name === "Magnetic");
               if (skill.amountAbtained == 10) skillToUnlock.unlocked = true;
               playerStats.moneyMultiplier += 0.1;
               break;
             case "Damage Increase II":
-              skill.amountAbtained += 1;
-              playerStats.money -= skill.cost;
-              skill.cost = Math.floor(skill.cost * 2);
               playerStats.strength += 1;
               break;
             case "Magnetic":
-              skill.amountAbtained += 1;
-              playerStats.money -= skill.cost;
               skillToUnlock = skills.find(s => s.name === "Close enough?");
               skillToUnlock.unlocked = true;
               playerStats.magnet = true;
               break;
             case "Close enough?":
-              skill.amountAbtained += 1;
-              playerStats.money -= skill.cost;
               playerStats.moneyOnHit = true;
               break;
             case "Vampirism Boost":
-              skill.amountAbtained += 1;
-              playerStats.money -= skill.cost;
               playerStats.vamprismBuff += 0.1;
               break;
             case "???":
               break;
           }
+
+          skill.amountAbtained = Math.min(skill.amountAbtained + 1, skill.maxAbtainable);
+          playerStats.money -= skill.cost;
+          skill.cost = Math.floor(skill.cost * skill.costInflation);
+
           document.getElementById("moneyDisplay").innerText = playerStats.money;
         }
       }
@@ -604,3 +597,21 @@ document.addEventListener("mousemove", (e) => {
     }
   });
 });
+
+const keys = {};
+document.addEventListener("keydown", (e) => {
+  keys[e.key.toLowerCase()] = true;
+});
+document.addEventListener("keyup", (e) => {
+  keys[e.key.toLowerCase()] = false;
+});
+
+function updateKeyboardMovement() {
+  const speed = 8;
+  if (keys["w"]) position[1] += speed;
+  if (keys["s"]) position[1] -= speed;
+  if (keys["a"]) position[0] += speed;
+  if (keys["d"]) position[0] -= speed;
+  requestAnimationFrame(updateKeyboardMovement);
+}
+updateKeyboardMovement();

@@ -9,5 +9,3 @@ todo:
     - add bigger player hitbox upgrade
 
 - Add escape when fighting idk
-
-- More money for bigger cubes etc
