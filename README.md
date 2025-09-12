@@ -1,11 +1,16 @@
 # Cube-Deluxe
 Major-Minor-Patch
-V1.3.6-alpha
+V1.3.7-alpha
 
 
 todo:
 
-- Add more skills to game
-    - add bigger player hitbox upgrade
+nothinggg so farrrr
 
-- Add escape when fighting idk
+
+idk:
+
+Small square = spawnEnemy("square", "red", 1, 50, 3);
+Medium square = spawnEnemy("square", "red", 1, 100, 6);
+
+small triangle = spawnEnemy("triangle", "purple", 3, 50, 15);

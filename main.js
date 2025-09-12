@@ -1,4 +1,4 @@
-import { drawEnemy, moveEnemy, enemy, moneyItem } from "./enemy.js";
+import { spawnEnemy, moveEnemy, enemy, moneyItem } from "./enemy.js";
 import { drawPlayer, drawPlayerHealthBar, drawTimer, player, playerStats, scaleBackground, scaleTimeoutId } from "./player.js";
 import { checkCollision, checkCollisionWithMoney } from "./collision.js";
 import { startIntervals, stopIntervals } from "./interval.js";
@@ -19,7 +19,7 @@ export const spaceTime = {
 //*woah its only run once!
 function runOnce() {
     if(!spaceTime.ranOnce) {
-        drawEnemy('square', "red", 1, 50, 3);
+        spawnEnemy('square', "red", 1, 50, 3);
         startIntervals();
         scaleBackground();
         spaceTime.ranOnce = true;

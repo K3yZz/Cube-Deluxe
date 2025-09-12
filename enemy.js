@@ -1,4 +1,4 @@
-import { player } from "./player.js";
+import { player, playerStats } from "./player.js";
 import { loadEnemyCanvas } from "./UI.js";
 
 const canvas = loadEnemyCanvas();
@@ -6,11 +6,10 @@ const ctx = canvas.getContext("2d");
 
 export let enemy = [];
 
-export function drawEnemy(type, color, amount, size, maxHealth) {
+export function spawnEnemy(type, color, amount, size, maxHealth) {
   if (typeof color === "string" && color.toLowerCase() === "red") color = "rgba(255, 0, 0, 1)";
   if (typeof color === "string" && color.toLowerCase() === "purple") color = "rgba(128, 0, 128, 1)";
 
-  // create enemies
   for (let i = 0; i < amount; i++) {
     enemy.push({
       x: Math.random() * canvas.width,
@@ -24,56 +23,84 @@ export function drawEnemy(type, color, amount, size, maxHealth) {
       lastHitTime: 0,
     });
   }
+}
 
-  // draw enemies
-  if (type === "square") {
-    enemy.forEach((e) => {
-      ctx.save();
-      ctx.translate(e.x + e.size / 2, e.y + e.size / 2);
-      ctx.rotate(e.rotation);
-      ctx.translate(-e.x - e.size / 2, -e.y - e.size / 2);
+export function drawEnemy(e) {
+  ctx.save();
+  ctx.translate(e.x + e.size / 2, e.y + e.size / 2);
+  ctx.rotate(e.rotation);
+  ctx.translate(-e.x - e.size / 2, -e.y - e.size / 2);
 
-      // outer enemy
-      ctx.beginPath();
-      ctx.rect(e.x, e.y, e.size + 10, e.size + 10);
-      ctx.strokeStyle = e.color;
-      ctx.lineWidth = 2;
-      ctx.stroke();
-      ctx.closePath();
+  if (e.type === "square") {
+    ctx.beginPath();
+    ctx.rect(e.x, e.y, e.size + 10, e.size + 10);
+    ctx.strokeStyle = e.color;
+    ctx.lineWidth = 2;
+    ctx.stroke();
+    ctx.closePath();
 
-      // inner health cube
-      const healthPercent = e.health / e.maxHealth;
-      const innerHeight = e.size * healthPercent;
+    const healthPercent = e.health / e.maxHealth;
+    const innerHeight = e.size * healthPercent;
 
-      ctx.beginPath();
-      ctx.rect(e.x + 5, e.y + (e.size - innerHeight) + 5, e.size, innerHeight);
-      ctx.fillStyle = e.color;
+    ctx.beginPath();
+    ctx.rect(e.x + 5, e.y + (e.size - innerHeight) + 5, e.size, innerHeight);
+    ctx.fillStyle = e.color;
 
-      let rgb = [255, 0, 0];
-      if (typeof e.color === "string" && e.color.startsWith("rgba")) {
-        rgb = e.color.match(/\d+/g).map(Number);
-      }
-      const secondColor = `rgba(${Math.max(rgb[0] - 5, 0)}, ${Math.min(rgb[1] + 31, 255)}, ${Math.min(rgb[2] + 31, 255)}, 0.8)`;
-      ctx.shadowColor = secondColor;
-      ctx.shadowBlur = 20;
-      ctx.fill();
-      ctx.closePath();
-
-      ctx.restore();
-    });
+    ctx.shadowColor = e.color;
+    ctx.shadowBlur = 20;
+    ctx.fill();
+    ctx.closePath();
   }
+
+  if (e.type === "triangle") {
+  const fullSize = e.size + 10;
+  const fullHeight = fullSize * Math.sqrt(3) / 2;
+  const cx = e.x + fullSize / 2;
+  const centroidY = e.y + (2 / 3) * fullHeight;
+  const padding = 8;
+  const healthPercent = Math.max(0, Math.min(1, e.health / e.maxHealth));
+  const innerSize = Math.max(0, fullSize - padding * 2) * healthPercent;
+  const innerHalf = innerSize / 2;
+  const innerHeight = innerSize * Math.sqrt(3) / 2;
+  const innerTopY = centroidY - (2 / 3) * innerHeight;
+  const innerBaseY = innerTopY + innerHeight;
+
+  if (innerSize > 0) {
+    ctx.beginPath();
+    ctx.moveTo(cx, innerTopY);
+    ctx.lineTo(cx - innerHalf, innerBaseY);
+    ctx.lineTo(cx + innerHalf, innerBaseY);
+    ctx.closePath();
+    ctx.shadowColor = e.color;
+    ctx.shadowBlur = 20;
+    ctx.fillStyle = e.color;
+    ctx.fill();
+    ctx.shadowBlur = 0;
+    ctx.shadowColor = 'transparent';
+  }
+
+  ctx.beginPath();
+  ctx.moveTo(cx, e.y);
+  ctx.lineTo(e.x, e.y + fullHeight);
+  ctx.lineTo(e.x + fullSize, e.y + fullHeight);
+  ctx.closePath();
+  ctx.strokeStyle = e.color;
+  ctx.lineWidth = 2;
+  ctx.stroke();
+}
+
+
+
+  ctx.restore();
 }
 
 export function moveEnemy() {
-  // Clear the canvas
   ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-  //vanish or spanish the cube
   enemy = enemy.filter(
     (e) => e.x <= canvas.width && e.x >= 0 && e.y <= canvas.height && e.y >= 0
   );
 
-  //if the cube did its spanish move
   enemy.forEach((e) => {
     const centerX = player.centerX;
     const centerY = player.centerY;
@@ -85,11 +112,10 @@ export function moveEnemy() {
 
     e.x += Math.cos(e.angle) * speed;
     e.y += Math.sin(e.angle) * speed;
+    e.rotation += 0.001;
 
-    e.rotation = (e.rotation || 0) + 0.001;
+    drawEnemy(e);
   });
-
-  drawEnemy("square", 0, 0);
 
   moneyItem.forEach((drop) => {
     drawMoney(drop.x, drop.y);
@@ -124,3 +150,9 @@ export function drawMoney(x, y, targetCtx = ctx) {
   targetCtx.closePath();
   targetCtx.restore();
 }
+
+
+//^ scale damage based on enemy count
+// export function scaleDamage() {
+//   playerStats.damageTickRateModifier = 1 + (enemy.length * 0.05);
+// }

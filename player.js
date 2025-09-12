@@ -9,6 +9,7 @@ export const playerStats = {
     strength: 1,
     attackSpeed: 1,
     damageTickRate: 10,
+    //damageTickRateModifier: 1,
     money: 0,
     moneyThisRun: 0,
     moneyMultiplier: 1,

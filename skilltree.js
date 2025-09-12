@@ -91,10 +91,22 @@ const skills = [
     maxAbtainable: 5,
     amountAbtained: 0,
     description: "Deal even more damage",
-    drawLinesTo: [""],
+    drawLinesTo: ["Size Boost"],
     hoveringOverSkill: false,
     unlocked: false,
     costInflation: 3.5,
+  },
+  {
+    name: "Size Boost",
+    pos: [200, -500],
+    cost: 100,
+    maxAbtainable: 3,
+    amountAbtained: 0,
+    description: "Increase player size by 10%",
+    drawLinesTo: [""],
+    hoveringOverSkill: false,
+    unlocked: false,
+    costInflation: 3.66,
   },
   {
     name: "Magnetic",
@@ -197,6 +209,8 @@ export function drawDeathOverlay() {
   editBox("create", againButton);
   editBox("create", earningsBox);
   editBox("create", tipBox);
+  
+  tipBox.innerText = randomTipGenerator();
 
 earningsBox.innerHTML = `
   <p style="font-size: 24px; margin-top: 10px;">You Earned</p>
@@ -239,6 +253,7 @@ function randomTipGenerator() {
     "Tip: you're poor...",
     'Tip: WASD to move the skill tree',
     'Tip: Pressing Y lets you leave the match',
+    'Tip: yesnt',
   ];
   const randomIndex = Math.floor(Math.random() * tips.length);
   return tips[randomIndex];
@@ -396,6 +411,8 @@ const draw = () => {
               playerStats.moneyMultiplier += 0.1;
               break;
             case "Damage Increase II":
+              skillToUnlock = skills.find(s => s.name === "Size Boost");
+              if (skill.amountAbtained === 4) skillToUnlock.unlocked = true;
               playerStats.strength += 1;
               break;
             case "Magnetic":
@@ -408,6 +425,9 @@ const draw = () => {
               break;
             case "Vampirism Boost":
               playerStats.vamprismBuff += 0.1;
+              break;
+            case "Size Boost":
+              player.size *= 1.1;
               break;
             case "???":
               break;
@@ -521,7 +541,6 @@ Object.assign(tipBox.style, {
   justifyContent: "center",
   zIndex: -10,
 });
-tipBox.innerText = randomTipGenerator();
 
 export const moneyBox = document.createElement("div");
 Object.assign(moneyBox.style, {

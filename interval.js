@@ -1,10 +1,10 @@
-import { drawEnemy } from "./enemy.js";
+import { spawnEnemy } from "./enemy.js";
 import { playerStats, player } from "./player.js";
 import { spaceTime } from "./main.js";
 import { drawDeathOverlay, position } from "./skilltree.js";
 import { loadDramaticText } from "./UI.js";
 
-let timerInterval, healthInterval, smallSquaresInterval, mediumSquaresInterval, bossSquareInterval, checkIfTabInterval;
+let timerInterval, healthInterval, squaresInterval, triangleInterval, bossSquareInterval, checkIfTabInterval, scaleDamageInterval;
 
 export function startIntervals() {
     //timer
@@ -23,7 +23,14 @@ export function startIntervals() {
         }
     }, 1000);
 
-    //decrease player health
+    //^ scale damage based off amount of enemies
+    // scaleDamageInterval = setInterval(() => {
+    //     if (!spaceTime.offTab) {
+    //         scaleDamage();
+    //     }
+    // }, 1000);
+
+    //base decrease player health
     healthInterval = setInterval(() => {
         if (!spaceTime.offTab) {
             playerStats.health -= 0.01;
@@ -39,25 +46,27 @@ export function startIntervals() {
         }
     }, playerStats.damageTickRate);
 
-    //spawn small squares
-    smallSquaresInterval = setInterval(() => {
+    //spawn enemys
+    squaresInterval = setInterval(() => {
         if (!spaceTime.offTab) {
-            drawEnemy("square", "red", 1, 50, 3);
+            spawnEnemy("square", "red", 1, 50, 3);
+            setTimeout(() => {
+                spawnEnemy("square", "red", 1, 100, 6);
+            }, 500);
         }
     }, 1000);
 
-    //spawn medium squares
-    mediumSquaresInterval = setInterval(() => {
-        if (!spaceTime.offTab) {
-            drawEnemy("square", "red", 1, 100, 6);
+    triangleInterval = setInterval(() => {
+        if (!spaceTime.offTab && player.time >= 45) {
+            spawnEnemy("triangle", "purple", 3, 50, 15);
         }
-    }, 1500);
+    }, 2000);
 
     bossSquareInterval = setInterval(() => {
         //first boss
         if (!spaceTime.offTab && player.time === 30) {
             loadDramaticText("Big Cube");
-            drawEnemy("square", "purple", 1, 300, 20);
+            spawnEnemy("square", "purple", 1, 300, 20);
         }
     }, 1000);
 }
@@ -65,7 +74,7 @@ export function startIntervals() {
 export function stopIntervals() {
     clearInterval(timerInterval);
     clearInterval(healthInterval);
-    clearInterval(smallSquaresInterval);
-    clearInterval(mediumSquaresInterval);
+    clearInterval(squaresInterval);
+    clearInterval(triangleInterval);
     clearInterval(bossSquareInterval);
 }
