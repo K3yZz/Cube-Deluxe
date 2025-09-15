@@ -36,7 +36,7 @@ export function checkCollision() {
 
         if (playerStats.vampire) {
           playerStats.health = Math.min(
-            playerStats.health + 1,
+            playerStats.health + 0.5 * playerStats.vamprismBuff,
             playerStats.maxHealth
           );
         }
@@ -53,8 +53,8 @@ export function checkCollisionWithMoney() {
     
         if (distance < player.size / 2 + 10) {
           moneyItem.splice(i, 1);
-          playerStats.money += 1 * playerStats.moneyMultiplier;
-          playerStats.moneyThisRun += 1 * playerStats.moneyMultiplier;
+          playerStats.money += Math.ceil(1 * playerStats.moneyMultiplier);
+          playerStats.moneyThisRun += Math.ceil(1 * playerStats.moneyMultiplier);
         }
     }
 }

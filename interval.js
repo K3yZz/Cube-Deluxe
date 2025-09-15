@@ -23,17 +23,17 @@ export function startIntervals() {
         }
     }, 1000);
 
-    //^ scale damage based off amount of enemies
-    // scaleDamageInterval = setInterval(() => {
-    //     if (!spaceTime.offTab) {
-    //         scaleDamage();
-    //     }
-    // }, 1000);
+    //scale damage based off amount of enemies
+    scaleDamageInterval = setInterval(() => {
+        if (!spaceTime.offTab) {
+            scaleDamage();
+        }
+    }, 1000);
 
     //base decrease player health
     healthInterval = setInterval(() => {
         if (!spaceTime.offTab) {
-            playerStats.health -= 0.01;
+            playerStats.health -= playerStats.healthDecreaseInt;
 
             if (playerStats.health <= 0) {
                 console.log("player health is 0");
@@ -49,24 +49,37 @@ export function startIntervals() {
     //spawn enemys
     squaresInterval = setInterval(() => {
         if (!spaceTime.offTab) {
-            spawnEnemy("square", "red", 1, 50, 3);
-            setTimeout(() => {
-                spawnEnemy("square", "red", 1, 100, 6);
-            }, 500);
+            if (player.time < 45) {
+                spawnEnemy("square", "red", 1, 50, 3);
+                setTimeout(() => {
+                    spawnEnemy("square", "red", 1, 100, 6);
+                }, 500);
+            }
+            if (player.time >= 45 && player.time < 150) {
+                setTimeout(() => {
+                    spawnEnemy("square", "red", 1, 100, 12);
+                }, 500);
+            }
         }
     }, 1000);
 
     triangleInterval = setInterval(() => {
         if (!spaceTime.offTab && player.time >= 45) {
-            spawnEnemy("triangle", "purple", 3, 50, 15);
+            spawnEnemy("triangle", "purple", 1, 50, 15);
         }
     }, 2000);
 
     bossSquareInterval = setInterval(() => {
         //first boss
-        if (!spaceTime.offTab && player.time === 30) {
-            loadDramaticText("Big Cube");
-            spawnEnemy("square", "purple", 1, 300, 20);
+        if (!spaceTime.offTab) {
+            if (player.time === 30) {
+                loadDramaticText("Big Cube");
+                spawnEnemy("square", "purple", 1, 300, 20, true);
+            }
+            if (player.time === 60) {
+                loadDramaticText("Panic Triangle");
+                spawnEnemy("triangle", "gold", 1, 500, 50, true);
+            }
         }
     }, 1000);
 }

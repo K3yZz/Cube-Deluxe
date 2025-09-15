@@ -1,4 +1,4 @@
-import { spawnEnemy, moveEnemy, enemy, moneyItem } from "./enemy.js";
+import { spawnEnemy, moveEnemy, enemy, moneyItem, moveMoneyItems } from "./enemy.js";
 import { drawPlayer, drawPlayerHealthBar, drawTimer, player, playerStats, scaleBackground, scaleTimeoutId } from "./player.js";
 import { checkCollision, checkCollisionWithMoney } from "./collision.js";
 import { startIntervals, stopIntervals } from "./interval.js";
@@ -14,6 +14,7 @@ export const spaceTime = {
     ranOnce: false,
     paused: false,
     offTab: false,
+    skillTreeOpen: false,
 };
 
 //*woah its only run once!
@@ -35,6 +36,7 @@ function gameLoop() {
         drawPlayerHealthBar();
         drawTimer();
         moveEnemy();
+        moveMoneyItems();
         checkCollision();
         checkCollisionWithMoney();
     }
@@ -48,6 +50,7 @@ export function startGame() {
 
     spaceTime.paused = false;
     spaceTime.ranOnce = false;
+    spaceTime.skillTreeOpen = false;
 
     document.body.style.overflow = 'hidden';
     document.body.style.cursor = 'none';
@@ -65,6 +68,7 @@ export function startGame() {
 
     playerStats.health = playerStats.maxHealth;
     playerStats.moneyThisRun = 0;
+    playerStats.healthDecreaseInt = 0.01;
     player.time = 0;
     enemy.length = 0;
     moneyItem.length = 0;

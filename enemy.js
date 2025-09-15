@@ -6,7 +6,8 @@ const ctx = canvas.getContext("2d");
 
 export let enemy = [];
 
-export function spawnEnemy(type, color, amount, size, maxHealth) {
+export function spawnEnemy(type, color, amount, size, maxHealth, boss) {
+  if (typeof color ==="string" && color.toLowerCase() === "gold") color = "rgba(255, 166, 0, 1)";
   if (typeof color === "string" && color.toLowerCase() === "red") color = "rgba(255, 0, 0, 1)";
   if (typeof color === "string" && color.toLowerCase() === "purple") color = "rgba(128, 0, 128, 1)";
 
@@ -21,6 +22,7 @@ export function spawnEnemy(type, color, amount, size, maxHealth) {
       color,
       rotation: 0,
       lastHitTime: 0,
+      boss: boss || false,
     });
   }
 }
@@ -151,8 +153,25 @@ export function drawMoney(x, y, targetCtx = ctx) {
   targetCtx.restore();
 }
 
+export function moveMoneyItems() {
+  if (!playerStats.magnet) return;
+  const speed = 1;
+  moneyItem.forEach((drop) => {
+    const dx = player.x - drop.x;
+    const dy = player.y - drop.y;
+    const dist = Math.sqrt(dx * dx + dy * dy);
+    if (dist > 1) {
+      drop.x += (dx / dist) * speed;
+      drop.y += (dy / dist) * speed;
+    }
+  });
+}
 
-//^ scale damage based on enemy count
-// export function scaleDamage() {
-//   playerStats.damageTickRateModifier = 1 + (enemy.length * 0.05);
-// }
+
+// scale damage based on enemy count
+export function scaleDamage() {
+  playerStats.healthDecreaseInt = 1 + (enemy.length * 0.025);
+  if (enemy.some(e => e.boss)) {
+    playerStats.healthDecreaseInt += 0.05;
+  }
+}

@@ -1,5 +1,5 @@
 import { loadSkillTreeCanvas } from "./UI.js";
-import { startGame } from "./main.js";
+import { startGame, spaceTime } from "./main.js";
 import { player, playerStats } from "./player.js";
 
 const canvas = loadSkillTreeCanvas();
@@ -49,6 +49,18 @@ const skills = [
     costInflation: 2.33,
   },
   {
+    name: "More Attack Speed II",
+    pos: [-200, -800],
+    cost: 500,
+    maxAbtainable: 5,
+    amountAbtained: 0,
+    description: "Increase Attack Speed even more",
+    drawLinesTo: [""],
+    hoveringOverSkill: false,
+    unlocked: false,
+    costInflation: 3.5,
+  },
+  {
     name: "More Health",
     pos: [200, -500],
     cost: 20,
@@ -63,7 +75,7 @@ const skills = [
   {
     name: "Slow Damage Taken",
     pos: [200, -800],
-    cost: 75,
+    cost: 1500,
     maxAbtainable: 3,
     amountAbtained: 0,
     description: "Slows down the rate of damage taken by 10%",
@@ -87,7 +99,7 @@ const skills = [
   {
     name: "Damage Increase II",
     pos: [200, -300],
-    cost: 100,
+    cost: 135,
     maxAbtainable: 5,
     amountAbtained: 0,
     description: "Deal even more damage",
@@ -99,7 +111,7 @@ const skills = [
   {
     name: "Size Boost",
     pos: [200, -500],
-    cost: 100,
+    cost: 15000,
     maxAbtainable: 3,
     amountAbtained: 0,
     description: "Increase player size by 10%",
@@ -111,23 +123,11 @@ const skills = [
   {
     name: "Magnetic",
     pos: [-500, -300],
-    cost: 0,
+    cost: 30000,
     maxAbtainable: 1,
     amountAbtained: 0,
     description: "Attracts money towards you",
     drawLinesTo: ["Close enough?"],
-    hoveringOverSkill: false,
-    unlocked: false,
-    costInflation: null,
-  },
-  {
-    name: "Close enough?",
-    pos: [-800, -500],
-    cost: 0,
-    maxAbtainable: 1,
-    amountAbtained: 0,
-    description: "Gives money on hit",
-    drawLinesTo: [""],
     hoveringOverSkill: false,
     unlocked: false,
     costInflation: null,
@@ -168,6 +168,8 @@ export function drawSkillTree() {
   skillTreeCanvas.style.zIndex = "3";
   skillTreeCanvas.style.cursor = "auto";
   skillTreeCanvas.style.pointerEvents = "auto";
+  spaceTime.skillTreeOpen = true;
+  
   editBox("create", startButton);
   editBox("create", moneyBox);
   editBox("delete", toSkillTreeButton);
@@ -262,9 +264,14 @@ function randomTipGenerator() {
 const draw = () => {
   window.requestAnimationFrame(draw);
 
+  drawBackground();
+  ctx.translate(position[0], position[1]);
+  drawSkills();
+};
+
+function drawBackground() {
   ctx.setTransform(1, 0, 0, 1, 0, 0);
   ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
-
   ctx.shadowBlur = 0;
   ctx.shadowColor = "transparent";
 
@@ -280,169 +287,195 @@ const draw = () => {
       ctx.fillRect(offsetX + x * tileSize, offsetY + y * tileSize, tileSize, tileSize);
     }
   }
+}
 
-  ctx.translate(position[0], position[1]);
+function drawSkills() {
+  let hovering = false;
 
   for (const skill of skills) {
-    if (skill.unlocked) {
-      ctx.shadowBlur = 0;
+    if (!skill.unlocked) continue;
 
-      for (const to of skill.drawLinesTo) {
-        const to_skill = skills.find((s) => s.name === to);
-        if (to_skill && to_skill.unlocked) {
-          ctx.beginPath();
-          ctx.moveTo(skill.pos[0], skill.pos[1]);
-          ctx.lineTo(to_skill.pos[0], to_skill.pos[1]);
-          ctx.strokeStyle = "rgb(255,255,255)";
-          ctx.lineWidth = 3;
-          ctx.stroke();
-        }
-      }
+    drawSkillConnections(skill);
+    drawSkillBox(skill);
 
-      ctx.fillStyle = "rgb(0,0,0)";
-      ctx.fillRect(skill.pos[0] - 32, skill.pos[1] - 32, 64, 64);
+    if (skill.hoveringOverSkill && spaceTime.skillTreeOpen) {
+      updateSkillDescriptionBox(skill);
+      hovering = true;
+    }
 
-      let borderStrokeColor = "rgb(255, 255, 255)";
-      let affordable = skill.cost <= playerStats.money;
-      let boughtAll = skill.amountAbtained === skill.maxAbtainable;
+    handleSkillPurchase(skill);
+  }
 
-      if (boughtAll) borderStrokeColor = "rgb(243, 240, 43)";
-      else if (affordable) borderStrokeColor = "rgb(64, 240, 143)";
+  if (!hovering) hideSkillDescriptionBox();
+}
 
-      ctx.strokeStyle = borderStrokeColor;
-      ctx.shadowColor = borderStrokeColor;
-      ctx.shadowBlur = 4;
-      ctx.strokeRect(skill.pos[0] - 32, skill.pos[1] - 32, 64, 64);
-
-      if (skill.hoveringOverSkill) {
-        ctx.shadowColor = "rgb(255,255,255)";
-        ctx.fillStyle = "rgb(1,1,1)";
-        ctx.fillRect(skill.pos[0] - 150, skill.pos[1] - 250, 300, 200);
-
-        ctx.textAlign = "center";
-        let fontSize = 24;
-        ctx.font = `${fontSize}px font`;
-        let maxWidth = 280;
-
-        while (ctx.measureText(skill.name).width > maxWidth && fontSize > 10) {
-          fontSize -= 1;
-          ctx.font = `${fontSize}px font`;
-        }
-        ctx.fillStyle = "white";
-        ctx.fillText(skill.name, skill.pos[0], skill.pos[1] - 215);
-
-        ctx.beginPath();
-        ctx.moveTo(skill.pos[0] - 150, skill.pos[1] - 200);
-        ctx.lineTo(skill.pos[0] + 150, skill.pos[1] - 200);
-        ctx.strokeStyle = "rgb(255, 255, 255)";
-        ctx.stroke();
-
-        ctx.font = "14px font";
-        ctx.fillStyle = "white";
-        const descLines = [];
-        const words = skill.description.split(" ");
-        let line = "";
-        const maxDescWidth = 280;
-        for (let i = 0; i < words.length; i++) {
-          const testLine = line + words[i] + " ";
-          if (ctx.measureText(testLine).width > maxDescWidth && line !== "") {
-            descLines.push(line.trim());
-            line = words[i] + " ";
-          } else {
-            line = testLine;
-          }
-        }
-        if (line) descLines.push(line.trim());
-        descLines.forEach((l, idx) => {
-          ctx.fillText(l, skill.pos[0], skill.pos[1] - 170 + idx * 18);
-        });
-
-        ctx.fillText("Cost: " + skill.cost + "$", skill.pos[0], skill.pos[1] - 100);
-        ctx.fillStyle = borderStrokeColor;
-        ctx.fillText(skill.amountAbtained + "/" + skill.maxAbtainable, skill.pos[0], skill.pos[1] - 60);
-      }
-
-      if (skill.hoveringOverSkill && dragging) {
-        if (typeof window.skillPurchaseCooldown === "undefined") {
-          window.skillPurchaseCooldown = false;
-        }
-
-        if (playerStats.money >= skill.cost && skill.amountAbtained < skill.maxAbtainable && !window.skillPurchaseCooldown) {
-          let skillToUnlock;
-          window.skillPurchaseCooldown = true;
-          setTimeout(() => {
-            window.skillPurchaseCooldown = false;
-          }, 500);
-
-          switch (skill.name) {
-            case "Vampire":
-              skillToUnlock = skills.find(s => s.name === "Damage Increase");
-              skillToUnlock.unlocked = true;
-              playerStats.vampire = true;
-              break;
-            case "Damage Increase":
-              skillToUnlock = ["More Attack Speed", "More Health", "More Money", "Damage Increase II"];
-              skillToUnlock.forEach(name => {
-                const s = skills.find(sk => sk.name === name);
-                if (s.name == "Damage Increase II") {
-                  if (skill.amountAbtained === 4) s.unlocked = true;
-                } else if (s.name == "More Money") {
-                  if (skill.amountAbtained === 2) s.unlocked = true;
-                } else if (s.name == "More Health" || s.name == "More Attack Speed") {
-                  s.unlocked = true;
-                }
-              });
-              playerStats.strength += 1;
-              break;
-            case "More Attack Speed":
-              playerStats.attackSpeed -= 0.1;
-              break;
-            case "More Health":
-              skillToUnlock = skills.find(s => s.name === "Slow Damage Taken");
-              if (skill.amountAbtained == 4) skillToUnlock.unlocked = true;
-              playerStats.maxHealth += 5;
-              break;
-            case "Slow Damage Taken":
-              playerStats.damageTickRate *= 0.9;
-              break;
-            case "More Money":
-              skillToUnlock = skills.find(s => s.name === "Magnetic");
-              if (skill.amountAbtained == 10) skillToUnlock.unlocked = true;
-              playerStats.moneyMultiplier += 0.1;
-              break;
-            case "Damage Increase II":
-              skillToUnlock = skills.find(s => s.name === "Size Boost");
-              if (skill.amountAbtained === 4) skillToUnlock.unlocked = true;
-              playerStats.strength += 1;
-              break;
-            case "Magnetic":
-              skillToUnlock = skills.find(s => s.name === "Close enough?");
-              skillToUnlock.unlocked = true;
-              playerStats.magnet = true;
-              break;
-            case "Close enough?":
-              playerStats.moneyOnHit = true;
-              break;
-            case "Vampirism Boost":
-              playerStats.vamprismBuff += 0.1;
-              break;
-            case "Size Boost":
-              player.size *= 1.1;
-              break;
-            case "???":
-              break;
-          }
-
-          skill.amountAbtained = Math.min(skill.amountAbtained + 1, skill.maxAbtainable);
-          playerStats.money -= skill.cost;
-          skill.cost = Math.floor(skill.cost * skill.costInflation);
-
-          document.getElementById("moneyDisplay").innerText = playerStats.money;
-        }
-      }
+function drawSkillConnections(skill) {
+  ctx.shadowBlur = 0;
+  for (const to of skill.drawLinesTo) {
+    const to_skill = skills.find((s) => s.name === to);
+    if (to_skill && to_skill.unlocked) {
+      ctx.beginPath();
+      ctx.moveTo(skill.pos[0], skill.pos[1]);
+      ctx.lineTo(to_skill.pos[0], to_skill.pos[1]);
+      ctx.strokeStyle = "rgb(255,255,255)";
+      ctx.lineWidth = 3;
+      ctx.stroke();
     }
   }
-};
+}
+
+function drawSkillBox(skill) {
+  ctx.fillStyle = "rgb(0,0,0)";
+  ctx.fillRect(skill.pos[0] - 32, skill.pos[1] - 32, 64, 64);
+
+  let borderStrokeColor = "rgb(255, 255, 255)";
+  let affordable = skill.cost <= playerStats.money;
+  let boughtAll = skill.amountAbtained === skill.maxAbtainable;
+
+  if (boughtAll) borderStrokeColor = "rgb(243, 240, 43)";
+  else if (affordable) borderStrokeColor = "rgb(64, 240, 143)";
+
+  ctx.strokeStyle = borderStrokeColor;
+  ctx.shadowColor = borderStrokeColor;
+  ctx.shadowBlur = 4;
+  ctx.strokeRect(skill.pos[0] - 32, skill.pos[1] - 32, 64, 64);
+}
+
+function updateSkillDescriptionBox(skill) {
+  let box = document.getElementById("skillDescriptionBox");
+  if (!box) {
+    box = document.createElement("div");
+    box.id = "skillDescriptionBox";
+    document.body.appendChild(box);
+
+    Object.assign(box.style, {
+      position: "absolute",
+      top: "50%",
+      left: "20px",
+      transform: "translateY(-50%)",
+      width: "250px",
+      padding: "15px",
+      backgroundColor: "rgba(10,10,10,0.9)",
+      color: "white",
+      border: "1px solid white",
+      fontFamily: "font, sans-serif",
+      fontSize: "14px",
+      lineHeight: "18px",
+      borderRadius: "8px",
+      boxShadow: "0 0 10px rgba(255,255,255,0.5)",
+      zIndex: "1000",
+    });
+  }
+
+  let borderStrokeColor = skill.amountAbtained === skill.maxAbtainable ? "rgb(243, 240, 43)" : skill.cost <= playerStats.money ? "rgb(64, 240, 143)" : "rgb(255, 255, 255)";
+
+  box.innerHTML = `
+    <h3 style="margin:0; text-align:center; font-size:18px;">${skill.name}</h3>
+    <hr style="border:1px solid white; margin:8px 0;">
+    <p>${skill.description}</p>
+    <p>Cost: ${skill.cost}$</p>
+    <p style="color:${borderStrokeColor};">${skill.amountAbtained}/${skill.maxAbtainable}</p>
+  `;
+  box.style.display = "block";
+}
+
+function hideSkillDescriptionBox() {
+  const box = document.getElementById("skillDescriptionBox");
+  if (box) box.style.display = "none";
+}
+
+function handleSkillPurchase(skill) {
+  if (!skill.hoveringOverSkill || !dragging) return;
+
+  if (typeof window.skillPurchaseCooldown === "undefined") window.skillPurchaseCooldown = false;
+
+  if (playerStats.money >= skill.cost && skill.amountAbtained < skill.maxAbtainable && !window.skillPurchaseCooldown) {
+    window.skillPurchaseCooldown = true;
+    setTimeout(() => {
+      window.skillPurchaseCooldown = false;
+    }, 500);
+
+    unlockSkillEffects(skill);
+
+    skill.amountAbtained = Math.min(skill.amountAbtained + 1, skill.maxAbtainable);
+    playerStats.money -= skill.cost;
+    skill.cost = Math.floor(skill.cost * skill.costInflation);
+
+    document.getElementById("moneyDisplay").innerText = playerStats.money;
+  }
+}
+
+function unlockSkillEffects(skill) {
+  let skillToUnlock;
+  switch (skill.name) {
+    case "Vampire":
+      skillToUnlock = skills.find(s => s.name === "Damage Increase");
+      skillToUnlock.unlocked = true;
+      playerStats.vampire = true;
+      break;
+      //! aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+    case "Damage Increase":
+      const unlockList = ["More Attack Speed", "More Health", "More Money", "Damage Increase II"];
+      unlockList.forEach(name => {
+        const s = skills.find(sk => sk.name === name);
+        if (s.name == "Damage Increase II") {
+          if (skill.amountAbtained === 3) s.unlocked = true;
+        } else if (s.name == "More Money") {
+          if (skill.amountAbtained === 2) s.unlocked = true;
+        } else if (s.name == "More Health" || s.name == "More Attack Speed") {
+          s.unlocked = true;
+        }
+      });
+      playerStats.strength += 1;
+      break;
+      case "Damage Increase II":
+      skillToUnlock = skills.find(s => s.name === "Size Boost");
+      if (skill.amountAbtained === 4) skillToUnlock.unlocked = true;
+      playerStats.strength += 1;
+      break;
+      //todo aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+    case "More Attack Speed":
+      playerStats.attackSpeed -= 0.1;
+      break;
+    case "More Attack Speed II":
+      playerStats.attackSpeed -= 0.1;
+      break;
+      //^ aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+    case "More Health":
+      skillToUnlock = skills.find(s => s.name === "Slow Damage Taken");
+      if (skill.amountAbtained == 4) skillToUnlock.unlocked = true;
+      playerStats.maxHealth += 5;
+      break;
+      //* aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+    case "Slow Damage Taken":
+      playerStats.damageTickRate *= 0.9;
+      break;
+      //? aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+    case "More Money":
+      skillToUnlock = skills.find(s => s.name === "Magnetic");
+      if (skill.amountAbtained == 10) skillToUnlock.unlocked = true;
+      playerStats.moneyMultiplier += 0.1;
+      break;
+      //~ aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+      //& aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+    case "Magnetic":
+      skillToUnlock = skills.find(s => s.name === "Close enough?");
+      skillToUnlock.unlocked = true;
+      playerStats.magnet = true;
+      break;
+      //! aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+    case "Vampirism Boost":
+      playerStats.vamprismBuff += 0.1;
+      break;
+      //todo aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+    case "Size Boost":
+      player.size *= 1.1;
+      break;
+      //^ aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+    case "???":
+      break;
+  }
+}
 
 
 export const startButton = document.createElement("button");
@@ -452,7 +485,8 @@ Object.assign(startButton.style, {
   position: "absolute",
   right: "20px",
   bottom: "20px",
-  border: "1px solid rgba(255, 255, 255, 0.5)",
+  border: "1px solid rgba(255, 255, 255, 1)",
+  borderRadius: "8px",
   backgroundColor: "rgba(0, 0, 0, 0.75)",
   color: "white",
   fontFamily: "font, arial",
@@ -549,7 +583,8 @@ Object.assign(moneyBox.style, {
   position: "absolute",
   right: "20px",
   top: "20px",
-  border: "1px solid rgba(255, 255, 255, 0.5)",
+  border: "1px solid rgba(255, 255, 255, 1)",
+  borderRadius: "8px",
   backgroundColor: "rgba(0, 0, 0, 0.75)",
   color: "white",
   fontFamily: "font, arial",
