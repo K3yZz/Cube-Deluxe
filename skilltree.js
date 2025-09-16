@@ -43,7 +43,7 @@ const skills = [
     maxAbtainable: 5,
     amountAbtained: 0,
     description: "Increase Attack Speed",
-    drawLinesTo: [""],
+    drawLinesTo: ["More Attack Speed II"],
     hoveringOverSkill: false,
     unlocked: false,
     costInflation: 2.33,
@@ -52,7 +52,7 @@ const skills = [
     name: "More Attack Speed II",
     pos: [-200, -800],
     cost: 500,
-    maxAbtainable: 5,
+    maxAbtainable: 4,
     amountAbtained: 0,
     description: "Increase Attack Speed even more",
     drawLinesTo: [""],
@@ -88,7 +88,7 @@ const skills = [
     name: "More Money",
     pos: [-200, -300],
     cost: 25,
-    maxAbtainable: 10,
+    maxAbtainable: 5,
     amountAbtained: 0,
     description: "Gain more money from enemies",
     drawLinesTo: ["Magnetic"],
@@ -110,7 +110,7 @@ const skills = [
   },
   {
     name: "Size Boost",
-    pos: [200, -500],
+    pos: [500, -300],
     cost: 15000,
     maxAbtainable: 3,
     amountAbtained: 0,
@@ -436,9 +436,15 @@ function unlockSkillEffects(skill) {
       //todo aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
     case "More Attack Speed":
       playerStats.attackSpeed -= 0.1;
+      playerStats.attackSpeed.toFixed(1);
+      player.backgroundOpacityChangeSpeed = 100 * playerStats.attackSpeed;
+      skillToUnlock = skills.find(s => s.name === "More Attack Speed II");
+      if (skill.amountAbtained == 4) skillToUnlock.unlocked = true;
       break;
     case "More Attack Speed II":
       playerStats.attackSpeed -= 0.1;
+      playerStats.attackSpeed.toFixed(1);
+      player.backgroundOpacityChangeSpeed = 100 * playerStats.attackSpeed;
       break;
       //^ aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
     case "More Health":
@@ -453,14 +459,13 @@ function unlockSkillEffects(skill) {
       //? aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
     case "More Money":
       skillToUnlock = skills.find(s => s.name === "Magnetic");
-      if (skill.amountAbtained == 10) skillToUnlock.unlocked = true;
-      playerStats.moneyMultiplier += 0.1;
+      if (skill.amountAbtained == 4) skillToUnlock.unlocked = true;
+      playerStats.moneyMultiplier += 0.2;
+      playerStats.moneyMultiplier.toFixed(1);
       break;
       //~ aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
       //& aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
     case "Magnetic":
-      skillToUnlock = skills.find(s => s.name === "Close enough?");
-      skillToUnlock.unlocked = true;
       playerStats.magnet = true;
       break;
       //! aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
@@ -470,6 +475,7 @@ function unlockSkillEffects(skill) {
       //todo aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
     case "Size Boost":
       player.size *= 1.1;
+      player.size.toFixed(1);
       break;
       //^ aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
     case "???":

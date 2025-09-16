@@ -167,7 +167,6 @@ export function moveMoneyItems() {
   });
 }
 
-
 // scale damage based on enemy count
 export function scaleDamage() {
   playerStats.healthDecreaseInt = 1 + (enemy.length * 0.025);

@@ -6,13 +6,15 @@ import { loadDramaticText } from "./UI.js";
 
 let timerInterval, healthInterval, squaresInterval, triangleInterval, bossSquareInterval, checkIfTabInterval, scaleDamageInterval;
 
-export function startIntervals() {
+export function startIntervals(gameSpeed = 1) {
+    gameSpeed = Math.max(gameSpeed, 0.1);
+
     //timer
     timerInterval = setInterval(() => {
         if (!spaceTime.offTab) {
             player.time += 1;
         }
-    }, 1000);
+    }, 1000 * gameSpeed);
 
     //check if the tab is open
     checkIfTabInterval = setInterval(() => {
@@ -21,14 +23,14 @@ export function startIntervals() {
         } else {
             spaceTime.offTab = true;
         }
-    }, 1000);
+    }, 1000 * gameSpeed);
 
     //scale damage based off amount of enemies
     scaleDamageInterval = setInterval(() => {
         if (!spaceTime.offTab) {
             scaleDamage();
         }
-    }, 1000);
+    }, 1000 * gameSpeed);
 
     //base decrease player health
     healthInterval = setInterval(() => {
@@ -44,7 +46,7 @@ export function startIntervals() {
                 stopIntervals();
             }
         }
-    }, playerStats.damageTickRate);
+    }, playerStats.damageTickRate * gameSpeed);
 
     //spawn enemys
     squaresInterval = setInterval(() => {
@@ -53,21 +55,26 @@ export function startIntervals() {
                 spawnEnemy("square", "red", 1, 50, 3);
                 setTimeout(() => {
                     spawnEnemy("square", "red", 1, 100, 6);
-                }, 500);
+                }, 500 * gameSpeed);
             }
             if (player.time >= 45 && player.time < 150) {
                 setTimeout(() => {
                     spawnEnemy("square", "red", 1, 100, 12);
-                }, 500);
+                }, 500 * gameSpeed);
             }
         }
-    }, 1000);
+    }, 1000 * gameSpeed);
 
     triangleInterval = setInterval(() => {
-        if (!spaceTime.offTab && player.time >= 45) {
-            spawnEnemy("triangle", "purple", 1, 50, 15);
-        }
-    }, 2000);
+        if (!spaceTime.offTab) {
+            if (player.time >= 45) {
+                spawnEnemy("triangle", "purple", 1, 50, 15);
+            }
+            if (player.time >= 70) {
+                spawnEnemy("triangle", "gold", 1, 100, 25);
+            } 
+        }   
+    }, 2000 * gameSpeed);
 
     bossSquareInterval = setInterval(() => {
         //first boss
@@ -81,7 +88,7 @@ export function startIntervals() {
                 spawnEnemy("triangle", "gold", 1, 500, 50, true);
             }
         }
-    }, 1000);
+    }, 1000 * gameSpeed);
 }
 
 export function stopIntervals() {
