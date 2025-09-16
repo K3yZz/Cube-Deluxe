@@ -2,13 +2,13 @@ import { spawnEnemy, moveEnemy, enemy, moneyItem, moveMoneyItems } from "./enemy
 import { drawPlayer, drawPlayerHealthBar, drawTimer, player, playerStats, scaleBackground, scaleTimeoutId } from "./player.js";
 import { checkCollision, checkCollisionWithMoney } from "./collision.js";
 import { startIntervals, stopIntervals } from "./interval.js";
-import { loadBackgroundCanvas, loadDeathOverlay, loadDebugInfo } from "./UI.js";
+import { loadBackgroundCanvas, loadDeathOverlay } from "./UI.js";
 import { editBox, startButton, toSkillTreeButton, againButton, earningsBox, moneyBox, tipBox } from "./skilltree.js";
 
 //*load backdrop
 loadBackgroundCanvas();
 loadDeathOverlay();
-loadDebugInfo();
+//loadDebugInfo();
 
 //*its space and time
 export const spaceTime = {
