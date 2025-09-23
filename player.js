@@ -1,7 +1,7 @@
-import { loadPlayerCanvas } from "./UI.js";
+import { loadCanvas } from "./UI.js";
 
-const canvas = loadPlayerCanvas();
-const ctx = canvas.getContext('2d');
+const canvas = loadCanvas({ zIndex: '2' });
+const ctx = canvas.getContext("2d");
 
 export const playerStats = {
     health: 10.00,

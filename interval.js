@@ -2,7 +2,7 @@ import { spawnEnemy } from "./enemy.js";
 import { playerStats, player } from "./player.js";
 import { spaceTime } from "./main.js";
 import { drawDeathOverlay, position } from "./skilltree.js";
-import { loadDramaticText } from "./UI.js";
+import { loadDramaticText } from "./textEffects.js";
 
 let timerInterval, healthInterval, squaresInterval, triangleInterval, bossSquareInterval, checkIfTabInterval, scaleDamageInterval;
 

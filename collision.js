@@ -58,3 +58,5 @@ export function checkCollisionWithMoney() {
         }
     }
 }
+
+//more?

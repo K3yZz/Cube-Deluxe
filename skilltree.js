@@ -1,15 +1,10 @@
-import { loadSkillTreeCanvas } from "./UI.js";
-import { startGame, spaceTime } from "./main.js";
+import { spaceTime } from "./main.js";
 import { player, playerStats } from "./player.js";
+import { animateText } from "./textEffects.js";
+import * as UI from "./UI.js";
 
-const canvas = loadSkillTreeCanvas();
+const canvas = UI.loadCanvas({ id: 'skillTreeCanvas', zIndex: '-999', pointerEvents: 'none', backgroundColor: 'rgba(21, 29, 58, 1)' });
 const ctx = canvas.getContext("2d");
-
-const myFont = new FontFace("font", "url('assets/font.ttf')");
-
-myFont.load().then((loadedFont) => {
-  document.fonts.add(loadedFont);
-});
 
 const skills = [
   {
@@ -20,6 +15,7 @@ const skills = [
     amountAbtained: 0,
     description: "Siphon health like a vampire.",
     drawLinesTo: ["Damage Increase", "Vampirism Boost"],
+    icon: "./assets/vampireIconSkill.png",
     hoveringOverSkill: false,
     unlocked: true,
     costInflation: null,
@@ -32,6 +28,7 @@ const skills = [
     amountAbtained: 0,
     description: "Deal +1 damage",
     drawLinesTo: ["More Attack Speed", "More Health", "More Money", "Damage Increase II"],
+    icon: "./assets/attackIconSkill.png",
     hoveringOverSkill: false,
     unlocked: false,
     costInflation: 2.33,
@@ -44,6 +41,7 @@ const skills = [
     amountAbtained: 0,
     description: "Increase Attack Speed",
     drawLinesTo: ["More Attack Speed II"],
+    icon: "null",
     hoveringOverSkill: false,
     unlocked: false,
     costInflation: 2.33,
@@ -55,6 +53,7 @@ const skills = [
     maxAbtainable: 4,
     amountAbtained: 0,
     description: "Increase Attack Speed even more",
+    icon: "null",
     drawLinesTo: [""],
     hoveringOverSkill: false,
     unlocked: false,
@@ -68,6 +67,7 @@ const skills = [
     amountAbtained: 0,
     description: "Increases max health",
     drawLinesTo: ["Slow Damage Taken"],
+    icon: "./assets/healthIconSkill.png",
     hoveringOverSkill: false,
     unlocked: false,
     costInflation: 2.33,
@@ -80,6 +80,7 @@ const skills = [
     amountAbtained: 0,
     description: "Slows down the rate of damage taken by 10%",
     drawLinesTo: [""],
+    icon: "./assets/timeIconSkill.png",
     hoveringOverSkill: false,
     unlocked: false,
     costInflation: 3,
@@ -92,6 +93,7 @@ const skills = [
     amountAbtained: 0,
     description: "Gain more money from enemies",
     drawLinesTo: ["Magnetic"],
+    icon: "./assets/moneyIconSkill.png",
     hoveringOverSkill: false,
     unlocked: false,
     costInflation: 3.33,
@@ -104,6 +106,7 @@ const skills = [
     amountAbtained: 0,
     description: "Deal even more damage",
     drawLinesTo: ["Size Boost"],
+    icon: "./assets/attackIconSkill.png",
     hoveringOverSkill: false,
     unlocked: false,
     costInflation: 3.5,
@@ -116,6 +119,7 @@ const skills = [
     amountAbtained: 0,
     description: "Increase player size by 10%",
     drawLinesTo: [""],
+    icon: "./assets/sizeIconSkill.png",
     hoveringOverSkill: false,
     unlocked: false,
     costInflation: 3.66,
@@ -123,11 +127,12 @@ const skills = [
   {
     name: "Magnetic",
     pos: [-500, -300],
-    cost: 30000,
+    cost: 7500,
     maxAbtainable: 1,
     amountAbtained: 0,
     description: "Attracts money towards you",
-    drawLinesTo: ["Close enough?"],
+    drawLinesTo: [""],
+    icon: "./assets/magnetIconSkill.png",
     hoveringOverSkill: false,
     unlocked: false,
     costInflation: null,
@@ -140,6 +145,7 @@ const skills = [
     amountAbtained: 0,
     description: "Increases the amount healed from Vampire by 10%",
     drawLinesTo: [""],
+    icon: "./assets/vampireIconSkill.png",
     hoveringOverSkill: false,
     unlocked: false,
     costInflation: 3.66,
@@ -152,6 +158,7 @@ const skills = [
     amountAbtained: 0,
     description: "????",
     drawLinesTo: [""],
+    icon: "null",
     hoveringOverSkill: false,
     unlocked: false,
     costInflation: 999999,
@@ -163,6 +170,40 @@ let previous_position = [0, 0];
 let drag_position = [0, 0];
 let dragging = false;
 
+let deathOverlay;
+export function loadDeathOverlay() {
+    deathOverlay = document.createElement('canvas');
+    deathOverlay.width = window.innerWidth;
+    deathOverlay.height = window.innerHeight;
+    deathOverlay.style.position = "absolute";
+
+    deathOverlay.style.zIndex = '-999'; //5
+
+    deathOverlay.id = 'deathOverlay';
+    
+    deathOverlay.style.pointerEvents = 'none';
+
+    deathOverlay.style.backgroundColor = "transparent";
+
+    function drawScanlines() {
+        const ctx = deathOverlay.getContext('2d');
+
+        const lineHeight = 2;
+        const lineSpacing = 2;
+
+        for (let y = 0; y < window.innerHeight; y += (lineHeight + lineSpacing)) {
+            ctx.fillStyle = 'rgba(11, 200, 233, 0.28)';
+            ctx.fillRect(0, y, window.innerWidth, lineHeight);
+        }
+    }
+
+    drawScanlines();
+    window.addEventListener('resize', drawScanlines);
+
+    document.body.appendChild(deathOverlay);
+    return deathOverlay;
+}
+
 export function drawSkillTree() {
   const skillTreeCanvas = document.getElementById("skillTreeCanvas");
   skillTreeCanvas.style.zIndex = "3";
@@ -170,23 +211,22 @@ export function drawSkillTree() {
   skillTreeCanvas.style.pointerEvents = "auto";
   spaceTime.skillTreeOpen = true;
   
-  editBox("create", startButton);
-  editBox("create", moneyBox);
-  editBox("delete", toSkillTreeButton);
-  editBox("delete", againButton);
-  editBox("delete", earningsBox);
-  editBox("delete", tipBox);
+  UI.editBox("create", UI.startButton);
+  UI.editBox("create", UI.moneyBox);
+  UI.editBox("delete", UI.toSkillTreeButton);
+  UI.editBox("delete", UI.againButton);
+  UI.editBox("delete", UI.earningsBox);
+  UI.editBox("delete", UI.tipBox);
 
   const deathOverlay = document.getElementById("deathOverlay");
     deathOverlay.style.zIndex = "-999";
     deathOverlay.style.cursor = "none";
     deathOverlay.style.pointerEvents = "none";
 
-  moneyBox.innerHTML = `
+  UI.moneyBox.innerHTML = `
     <p style="font-size: 18px; margin: 5px 0 0 0;">Money</p>
     <div style="display: flex; align-items: center; justify-content: center;">
       <p id="moneyDisplay" style="font-size: 14px; margin: 0;">${playerStats.money}</p>
-      <canvas id="moneyIcon" width="24" height="24" style="margin-left: 8px; vertical-align: middle;"></canvas>
     </div>
   `;
 
@@ -207,22 +247,33 @@ export function drawDeathOverlay() {
   deathOverlay.style.zIndex = "5";
   deathOverlay.style.cursor = "auto";
   deathOverlay.style.pointerEvents = "auto";
-  editBox("create", toSkillTreeButton);
-  editBox("create", againButton);
-  editBox("create", earningsBox);
-  editBox("create", tipBox);
+  UI.editBox("create", UI.toSkillTreeButton);
+  UI.editBox("create", UI.againButton);
+  UI.editBox("create", UI.earningsBox);
+  UI.editBox("create", UI.tipBox);
   
-  tipBox.innerText = randomTipGenerator();
+  UI.tipBox.innerText = randomTipGenerator();
+  let earnings = playerStats.moneyThisRun;
+  if (playerStats.moneyThisRun === 0) {
+  earnings = "Nothing...";
+  } else if (playerStats.moneyThisRun >= 1000) {
+    earnings = playerStats.moneyThisRun.toLocaleString();
+  }
 
-earningsBox.innerHTML = `
-  <p style="font-size: 24px; margin-top: 10px;">You Earned</p>
+UI.earningsBox.innerHTML = `
+  <p id="earnedText" style="font-size: 24px; margin-top: 12px; position: relative;">You Earned</p>
   <div style="display: flex; align-items: center; justify-content: center;">
-    <span id="earningsAmount" style="font-size: 16px; margin: 10px 0;">
-      ${playerStats.moneyThisRun}
-    </span>
-    <canvas id="earningsMoneyIcon" width="24" height="24" style="margin-left: 8px; vertical-align: middle;"></canvas>
+    <span id="earningsAmount" style="font-size: 16px; margin: 10px 0;">${earnings}</span>
   </div>
 `;
+
+if (playerStats.moneyThisRun === 0) {
+  let earningsAmount = document.getElementById("earningsAmount");
+  earningsAmount.style.color = "rgba(255, 40, 40, 1)";
+} 
+
+const el = document.getElementById("earnedText");
+animateText(el, { wavy: true, rainbow: true });
 
 setTimeout(() => {
   const iconCanvas = document.getElementById("earningsMoneyIcon");
@@ -261,32 +312,58 @@ function randomTipGenerator() {
   return tips[randomIndex];
 }
 
-const draw = () => {
-  window.requestAnimationFrame(draw);
+function draw() {
+  ctx.setTransform(1, 0, 0, 1, 0, 0);
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
 
   drawBackground();
+
   ctx.translate(position[0], position[1]);
   drawSkills();
-};
+
+  requestAnimationFrame(draw);
+}
+
+const bgCanvas = UI.loadCanvas({
+  id: 'skillTreeBackground',
+  zIndex: '-999',
+  pointerEvents: 'none',
+});
+bgCanvas.style.imageRendering = 'pixelated';
+
+const bgCtx = bgCanvas.getContext('2d');
+
+let offset = 0;
+
+function preRenderBackground() {
+  const lineSpacing = 80;
+  const waveAmplitude = 40;
+  const waveFrequency = 0.05;
+  const lineThickness = 16;
+
+  bgCtx.fillStyle = 'rgb(18, 16, 50)';
+  bgCtx.fillRect(0, 0, bgCanvas.width, bgCanvas.height);
+
+  bgCtx.fillStyle = 'rgb(60, 60, 160)';
+
+  for (let y = -bgCanvas.height; y < bgCanvas.height; y += lineSpacing) {
+    for (let x = 0; x <= bgCanvas.width; x += 4) {
+      const wave = Math.sin(x * waveFrequency + offset) * waveAmplitude;
+      const px = Math.round(x);
+      const py = Math.round(y + x * 0.5 + wave);
+      bgCtx.fillRect(px, py, 4, lineThickness);
+    }
+  }
+}
 
 function drawBackground() {
   ctx.setTransform(1, 0, 0, 1, 0, 0);
-  ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
-  ctx.shadowBlur = 0;
-  ctx.shadowColor = "transparent";
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-  const tileSize = 64;
-  const cols = Math.ceil(ctx.canvas.width / tileSize) + 1;
-  const rows = Math.ceil(ctx.canvas.height / tileSize) + 1;
-  const offsetX = -(position[0] % tileSize);
-  const offsetY = -(position[1] % tileSize);
+  ctx.drawImage(bgCanvas, 0, 0);
 
-  for (let y = 0; y < rows; y++) {
-    for (let x = 0; x < cols; x++) {
-      ctx.fillStyle = (x + y) % 2 === 0 ? "rgba(33, 73, 132, 0.2)" : "rgba(22, 48, 86, 0.2)";
-      ctx.fillRect(offsetX + x * tileSize, offsetY + y * tileSize, tileSize, tileSize);
-    }
-  }
+  offset += 0.02;
+  preRenderBackground();
 }
 
 function drawSkills() {
@@ -325,8 +402,12 @@ function drawSkillConnections(skill) {
 }
 
 function drawSkillBox(skill) {
+  const icon = new Image();
+  icon.src = skill.icon;
+
   ctx.fillStyle = "rgb(0,0,0)";
   ctx.fillRect(skill.pos[0] - 32, skill.pos[1] - 32, 64, 64);
+  ctx.drawImage(icon, skill.pos[0] - 32, skill.pos[1] - 32, 64, 64);
 
   let borderStrokeColor = "rgb(255, 255, 255)";
   let affordable = skill.cost <= playerStats.money;
@@ -337,7 +418,7 @@ function drawSkillBox(skill) {
 
   ctx.strokeStyle = borderStrokeColor;
   ctx.shadowColor = borderStrokeColor;
-  ctx.shadowBlur = 4;
+  ctx.shadowBlur = 2;
   ctx.strokeRect(skill.pos[0] - 32, skill.pos[1] - 32, 64, 64);
 }
 
@@ -362,7 +443,7 @@ function updateSkillDescriptionBox(skill) {
       fontSize: "14px",
       lineHeight: "18px",
       borderRadius: "8px",
-      boxShadow: "0 0 10px rgba(255,255,255,0.5)",
+      boxShadow: "0 0 5px rgba(255,255,255,0.5)",
       zIndex: "1000",
     });
   }
@@ -482,135 +563,6 @@ function unlockSkillEffects(skill) {
       break;
   }
 }
-
-
-export const startButton = document.createElement("button");
-Object.assign(startButton.style, {
-  width: "150px",
-  height: "70px",
-  position: "absolute",
-  right: "20px",
-  bottom: "20px",
-  border: "1px solid rgba(255, 255, 255, 1)",
-  borderRadius: "8px",
-  backgroundColor: "rgba(0, 0, 0, 0.75)",
-  color: "white",
-  fontFamily: "font, arial",
-  fontSize: "16px",
-  textAlign: "center",
-  zIndex: -10,
-});
-startButton.innerText = "Deploy";
-startButton.onclick = startGame;
-
-export const toSkillTreeButton = document.createElement("button");
-Object.assign(toSkillTreeButton.style, {
-  width: "150px",
-  height: "70px",
-  position: "absolute",
-  left: "40%",
-  top: "50%",
-  transform: "translate(-50%, -50%)",
-  border: "1px solid white",
-  boxShadow: "0px 0px 5px white",
-  backgroundColor: "rgba(11, 200, 233, 0.75)",
-  color: "white",
-  fontFamily: "font, arial",
-  fontSize: "16px",
-  textAlign: "center",
-  zIndex: -10,
-});
-toSkillTreeButton.innerText = "Upgrade";
-toSkillTreeButton.onclick = drawSkillTree;
-
-export const againButton = document.createElement("button");
-Object.assign(againButton.style, {
-  width: "150px",
-  height: "70px",
-  position: "absolute",
-  left: "60%",
-  top: "50%",
-  transform: "translate(-50%, -50%)",
-  border: "1px solid white",
-  boxShadow: "0px 0px 5px white",
-  backgroundColor: "rgba(11, 200, 233, 0.75)",
-  color: "white",
-  fontFamily: "font, arial",
-  fontSize: "16px",
-  textAlign: "center",
-  zIndex: -10,
-});
-againButton.innerText = "Deploy";
-againButton.onclick = startGame;
-
-export const earningsBox = document.createElement("div");
-Object.assign(earningsBox.style, {
-  width: "300px",
-  height: "140px",
-  position: "absolute",
-  left: "50%",
-  top: "30%",
-  transform: "translate(-50%, -50%)",
-  border: "1px solid white",
-  boxShadow: "0px 0px 5px white",
-  backgroundColor: "rgba(11, 200, 233, 0.75)",
-  color: "white",
-  fontFamily: "font, arial",
-  fontSize: "16px",
-  textAlign: "center",
-  zIndex: -10,
-});
-
-export const tipBox = document.createElement("div");
-Object.assign(tipBox.style, {
-  width: "300px",
-  height: "40px",
-  position: "absolute",
-  display: "flex",
-  left: "50%",
-  top: "90%",
-  transform: "translate(-50%, -50%)",
-  border: "1px solid white",
-  boxShadow: "0px 0px 5px white",
-  backgroundColor: "rgba(11, 200, 233, 0.75)",
-  color: "white",
-  fontFamily: "font, arial",
-  fontSize: "16px",
-  textAlign: "center",
-  alignItems: "center",
-  justifyContent: "center",
-  zIndex: -10,
-});
-
-export const moneyBox = document.createElement("div");
-Object.assign(moneyBox.style, {
-  width: "140px",
-  height: "50px",
-  position: "absolute",
-  right: "20px",
-  top: "20px",
-  border: "1px solid rgba(255, 255, 255, 1)",
-  borderRadius: "8px",
-  backgroundColor: "rgba(0, 0, 0, 0.75)",
-  color: "white",
-  fontFamily: "font, arial",
-  fontSize: "16px",
-  textAlign: "center",
-  zIndex: -10,
-});
-
-export function editBox(type, box) {
-  if (!document.body.contains(box)) {
-    document.body.appendChild(box);
-  }
-
-  if (type === "create") {
-    box.style.zIndex = 10;
-  } else if (type === "delete") {
-    box.style.zIndex = -10;
-  }
-};
-
 //for movable area
 document.addEventListener("mousedown", (e) => {
   dragging = true;

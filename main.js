@@ -1,14 +1,56 @@
-import { spawnEnemy, moveEnemy, enemy, moneyItem, moveMoneyItems } from "./enemy.js";
-import { drawPlayer, drawPlayerHealthBar, drawTimer, player, playerStats, scaleBackground, scaleTimeoutId } from "./player.js";
-import { checkCollision, checkCollisionWithMoney } from "./collision.js";
-import { startIntervals, stopIntervals } from "./interval.js";
-import { loadBackgroundCanvas, loadDeathOverlay } from "./UI.js";
-import { editBox, startButton, toSkillTreeButton, againButton, earningsBox, moneyBox, tipBox } from "./skilltree.js";
+import * as UI from './UI.js';
+import * as skilltree from './skilltree.js';
+import * as playerMod from './player.js';
+import * as enemyMod from './enemy.js';
+import * as intervalMod from './interval.js';
+import * as collision from './collision.js';
+import * as textEffects from './textEffects.js';
 
+let backgroundCanvas;
+function loadBackgroundCanvas() {
+    backgroundCanvas = document.createElement('canvas');
+
+    backgroundCanvas.width = window.innerWidth;
+    backgroundCanvas.height = window.innerHeight;
+
+    backgroundCanvas.style.position = 'absolute';
+    backgroundCanvas.style.zIndex = '0';
+    backgroundCanvas.style.backgroundColor = 'rgb(8, 8, 8)';
+
+    function loadBackgroundEffect() {
+        const ctx = backgroundCanvas.getContext('2d');
+        const stars = [];
+    
+        for (let i = 0; i < 100; i++) {
+            stars.push({
+                x: Math.random() * backgroundCanvas.width,
+                y: Math.random() * backgroundCanvas.height,
+                size: Math.random() * 2 + 1,
+                opacity: Math.random() * 0.5 + 0.5,
+            });
+        }
+    
+        function drawStars() {
+            ctx.clearRect(0, 0, backgroundCanvas.width, backgroundCanvas.height);
+            stars.forEach(star => {
+                ctx.fillStyle = `rgba(255, 255, 255, ${star.opacity})`;
+                ctx.beginPath();
+                ctx.arc(star.x, star.y, star.size, 0, Math.PI * 2);
+                ctx.fill();
+            });
+            requestAnimationFrame(drawStars);
+        }
+        drawStars();
+    }
+
+    loadBackgroundEffect();
+
+    document.body.appendChild(backgroundCanvas);
+    return backgroundCanvas;
+}
 //*load backdrop
+skilltree.loadDeathOverlay();
 loadBackgroundCanvas();
-loadDeathOverlay();
-//loadDebugInfo();
 
 //*its space and time
 export const spaceTime = {
@@ -21,9 +63,9 @@ export const spaceTime = {
 //*woah its only run once!
 function runOnce() {
     if(!spaceTime.ranOnce) {
-        spawnEnemy('square', "red", 1, 50, 3);
-        startIntervals();
-        scaleBackground();
+        enemyMod.spawnEnemy('square', "red", 1, 50, 3);
+        intervalMod.startIntervals();
+        playerMod.scaleBackground();
         spaceTime.ranOnce = true;
     }
 }
@@ -33,21 +75,21 @@ let gameLoopId;
 function gameLoop() {
     if (!spaceTime.paused || spaceTime.offTab) {
         runOnce();
-        drawPlayer();
-        drawPlayerHealthBar();
-        drawTimer();
-        moveEnemy();
-        moveMoneyItems();
-        checkCollision();
-        checkCollisionWithMoney();
+        playerMod.drawPlayer();
+        playerMod.drawPlayerHealthBar();
+        playerMod.drawTimer();
+        enemyMod.moveEnemy();
+        enemyMod.moveMoneyItems();
+        collision.checkCollision();
+        collision.checkCollisionWithMoney();
     }
     gameLoopId = requestAnimationFrame(gameLoop);
 }
 
 export function startGame() {
     cancelAnimationFrame(gameLoopId);
-    clearTimeout(scaleTimeoutId);
-    stopIntervals();
+    clearTimeout(playerMod.scaleTimeoutId);
+    intervalMod.stopIntervals();
 
     spaceTime.paused = false;
     spaceTime.ranOnce = false;
@@ -67,19 +109,19 @@ export function startGame() {
     deathOverlay.style.cursor = "none";
     deathOverlay.style.pointerEvents = "none";
 
-    playerStats.health = playerStats.maxHealth;
-    playerStats.moneyThisRun = 0;
-    playerStats.healthDecreaseInt = 0.01;
-    player.time = 0;
-    enemy.length = 0;
-    moneyItem.length = 0;
+    playerMod.playerStats.health = playerMod.playerStats.maxHealth;
+    playerMod.playerStats.moneyThisRun = 0;
+    playerMod.playerStats.healthDecreaseInt = 0.01;
+    playerMod.player.time = 0;
+    enemyMod.enemy.length = 0;
+    enemyMod.moneyItem.length = 0;
 
-    editBox("delete", startButton);
-    editBox("delete", toSkillTreeButton);
-    editBox("delete", againButton);
-    editBox("delete", earningsBox);
-    editBox("delete", moneyBox);
-    editBox("delete", tipBox);
+    UI.editBox("delete", UI.startButton);
+    UI.editBox("delete", UI.toSkillTreeButton);
+    UI.editBox("delete", UI.againButton);
+    UI.editBox("delete", UI.earningsBox);
+    UI.editBox("delete", UI.moneyBox);
+    UI.editBox("delete", UI.tipBox);
     gameLoop();
 }
 
@@ -87,6 +129,6 @@ startGame();
 
 document.addEventListener("keydown", (e) => {
   if (e.key === "y") {
-    playerStats.health = 0;
+    playerMod.playerStats.health = 0;
   }
 });

@@ -1,7 +1,7 @@
 import { player, playerStats } from "./player.js";
-import { loadEnemyCanvas } from "./UI.js";
+import { loadCanvas } from "./UI.js";
 
-const canvas = loadEnemyCanvas();
+const canvas = loadCanvas({ zIndex: '1', pointerEvents: 'none' });
 const ctx = canvas.getContext("2d");
 
 export let enemy = [];
@@ -128,17 +128,20 @@ export let moneyItem = [];
 
 // MODIFIED TEST PLEASE VVV
 export function enemyDropMoney(enemy) {
-    const numDrops = Math.floor(Math.random() * (enemy.maxHealth / 1.5)) + (enemy.maxHealth - 2);
-  
-    for (let i = 0; i < numDrops; i++) {
-      const angle = Math.random() * Math.PI * 2;
-      const distance = Math.random() * 200;
-  
-      const dropX = enemy.x + Math.cos(angle) * distance;
-      const dropY = enemy.y + Math.sin(angle) * distance;
-  
-      moneyItem.push({ x: dropX, y: dropY });
-    }
+  const numDrops = Math.floor(Math.random() * (enemy.maxHealth / 1.5)) + (enemy.maxHealth - 2);
+
+  for (let i = 0; i < numDrops; i++) {
+    const angle = Math.random() * Math.PI * 2;
+    const distance = Math.random() * 200;
+
+    let dropX = enemy.x + Math.cos(angle) * distance;
+    let dropY = enemy.y + Math.sin(angle) * distance;
+
+    dropX = Math.max(0, Math.min(canvas.width, dropX));
+    dropY = Math.max(0, Math.min(canvas.height, dropY));
+
+    moneyItem.push({ x: dropX, y: dropY });
+  }
 }
 
 export function drawMoney(x, y, targetCtx = ctx) {
