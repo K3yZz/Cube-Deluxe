@@ -1,7 +1,7 @@
 import { enemy, enemyDropMoney, moneyItem } from "./enemy.js";
 import { player, playerStats } from "./player.js";
 
-export function checkCollision() {
+export function ccPlayerToEnemy() {
   for (let i = enemy.length - 1; i >= 0; i--) {
     const playerLeft = player.x - player.size / 2;
     const playerRight = player.x + player.size / 2;
@@ -45,18 +45,43 @@ export function checkCollision() {
   }
 }
 
-export function checkCollisionWithMoney() {
+export function ccPlayerToMoney() {
     for (let i = 0; i < moneyItem.length; i++) {
         const dx = player.x - moneyItem[i].x;
         const dy = player.y - moneyItem[i].y;
+        let value = moneyItem[i].value;
         const distance = Math.sqrt(dx * dx + dy * dy);
     
         if (distance < player.size / 2 + 10) {
           moneyItem.splice(i, 1);
-          playerStats.money += Math.ceil(1 * playerStats.moneyMultiplier);
-          playerStats.moneyThisRun += Math.ceil(1 * playerStats.moneyMultiplier);
+          playerStats.money += Math.ceil(value);
+          playerStats.moneyThisRun += Math.ceil(value);
         }
     }
 }
 
-//more?
+export function ccMoneyToMoney() {
+  if (moneyItem.length <= 1) return;
+
+  const toRemove = new Set();
+
+  for (let i = 0; i < moneyItem.length; i++) {
+    for (let j = i + 1; j < moneyItem.length; j++) {
+      if (toRemove.has(i) || toRemove.has(j)) continue;
+
+      const dx = moneyItem[i].x - moneyItem[j].x;
+      const dy = moneyItem[i].y - moneyItem[j].y;
+      const distance = Math.sqrt(dx * dx + dy * dy);
+
+      if (distance < 20) {
+        moneyItem[i].value += moneyItem[j].value;
+        toRemove.add(j);
+      }
+    }
+  }
+
+  const indices = Array.from(toRemove).sort((a, b) => b - a);
+  for (const index of indices) {
+    moneyItem.splice(index, 1);
+  }
+}

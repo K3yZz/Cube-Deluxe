@@ -1,3 +1,4 @@
+import { spaceTime } from "./main.js";
 import { player, playerStats } from "./player.js";
 import { loadCanvas } from "./UI.js";
 
@@ -6,10 +7,11 @@ const ctx = canvas.getContext("2d");
 
 export let enemy = [];
 
-export function spawnEnemy(type, color, amount, size, maxHealth, boss) {
+export function spawnEnemy(type, color, amount, size, maxHealth, dropAmount = [], boss) {
   if (typeof color ==="string" && color.toLowerCase() === "gold") color = "rgba(255, 166, 0, 1)";
   if (typeof color === "string" && color.toLowerCase() === "red") color = "rgba(255, 0, 0, 1)";
   if (typeof color === "string" && color.toLowerCase() === "purple") color = "rgba(128, 0, 128, 1)";
+  if (typeof color === "string" && color.toLowerCase() === "blue") color = "rgba(50, 102, 179, 1)";
 
   for (let i = 0; i < amount; i++) {
     enemy.push({
@@ -19,6 +21,8 @@ export function spawnEnemy(type, color, amount, size, maxHealth, boss) {
       type,
       health: maxHealth,
       maxHealth,
+      dropAmount: dropAmount,
+      moneyValue: 1,
       color,
       rotation: 0,
       lastHitTime: 0,
@@ -28,70 +32,111 @@ export function spawnEnemy(type, color, amount, size, maxHealth, boss) {
 }
 
 export function drawEnemy(e) {
+  const fullSize = Math.max(8, Math.round(e.size + 10));
+  const cx = e.x + fullSize / 2;
+  const cy = e.y + fullSize / 2;
+  const health = Math.max(0, Math.min(1, (e.health || 0) / (e.maxHealth || 1)));
+
+  const strokeW = 2;
+  const paddingPx = Math.max(4, Math.round(fullSize * 0.08));
+  const outlineInset = paddingPx + Math.ceil(strokeW / 2);
+
   ctx.save();
-  ctx.translate(e.x + e.size / 2, e.y + e.size / 2);
-  ctx.rotate(e.rotation);
-  ctx.translate(-e.x - e.size / 2, -e.y - e.size / 2);
+  ctx.translate(cx, cy);
+  ctx.rotate(e.rotation || 0);
+  ctx.lineWidth = strokeW;
+  ctx.strokeStyle = e.color;
+  ctx.fillStyle = e.color;
 
   if (e.type === "square") {
+    const half = fullSize / 2;
     ctx.beginPath();
-    ctx.rect(e.x, e.y, e.size + 10, e.size + 10);
-    ctx.strokeStyle = e.color;
-    ctx.lineWidth = 2;
+    ctx.rect(-half, -half, fullSize, fullSize);
     ctx.stroke();
-    ctx.closePath();
 
-    const healthPercent = e.health / e.maxHealth;
-    const innerHeight = e.size * healthPercent;
+    const baseInner = Math.max(2, fullSize - 2 * outlineInset);
 
-    ctx.beginPath();
-    ctx.rect(e.x + 5, e.y + (e.size - innerHeight) + 5, e.size, innerHeight);
-    ctx.fillStyle = e.color;
-
-    ctx.shadowColor = e.color;
-    ctx.shadowBlur = 20;
-    ctx.fill();
-    ctx.closePath();
+    if (health > 0) {
+      ctx.save();
+      ctx.shadowColor = e.color;
+      ctx.shadowBlur = 20;
+      ctx.scale(health, health);
+      ctx.fillStyle = e.color;
+      ctx.fillRect(-baseInner / 2, -baseInner / 2, baseInner, baseInner);
+      ctx.restore();
+      ctx.shadowBlur = 0;
+      ctx.shadowColor = 'transparent';
+    }
   }
 
   if (e.type === "triangle") {
-  const fullSize = e.size + 10;
-  const fullHeight = fullSize * Math.sqrt(3) / 2;
-  const cx = e.x + fullSize / 2;
-  const centroidY = e.y + (2 / 3) * fullHeight;
-  const padding = 8;
-  const healthPercent = Math.max(0, Math.min(1, e.health / e.maxHealth));
-  const innerSize = Math.max(0, fullSize - padding * 2) * healthPercent;
-  const innerHalf = innerSize / 2;
-  const innerHeight = innerSize * Math.sqrt(3) / 2;
-  const innerTopY = centroidY - (2 / 3) * innerHeight;
-  const innerBaseY = innerTopY + innerHeight;
-
-  if (innerSize > 0) {
+    const fullHeight = fullSize * Math.sqrt(3) / 2;
+    const topY = -fullHeight / 2;
+    const leftX = -fullSize / 2;
+    const rightX = fullSize / 2;
     ctx.beginPath();
-    ctx.moveTo(cx, innerTopY);
-    ctx.lineTo(cx - innerHalf, innerBaseY);
-    ctx.lineTo(cx + innerHalf, innerBaseY);
+    ctx.moveTo(0, topY);
+    ctx.lineTo(leftX, topY + fullHeight);
+    ctx.lineTo(rightX, topY + fullHeight);
     ctx.closePath();
-    ctx.shadowColor = e.color;
-    ctx.shadowBlur = 20;
-    ctx.fillStyle = e.color;
-    ctx.fill();
-    ctx.shadowBlur = 0;
-    ctx.shadowColor = 'transparent';
+    ctx.stroke();
+
+    const baseInner = Math.max(2, fullSize - 2 * outlineInset);
+    const innerHeight = baseInner * Math.sqrt(3) / 2;
+    const centroidY = topY + (2 / 3) * fullHeight;
+
+    if (health > 0) {
+      ctx.save();
+      ctx.translate(0, centroidY);
+      ctx.shadowColor = e.color;
+      ctx.shadowBlur = 20;
+      ctx.scale(health, health);
+      ctx.fillStyle = e.color;
+      ctx.beginPath();
+      ctx.moveTo(0, -(2 / 3) * innerHeight);
+      ctx.lineTo(-baseInner / 2, innerHeight / 3);
+      ctx.lineTo(baseInner / 2, innerHeight / 3);
+      ctx.closePath();
+      ctx.fill();
+      ctx.restore();
+      ctx.shadowBlur = 0;
+      ctx.shadowColor = 'transparent';
+    }
   }
 
-  ctx.beginPath();
-  ctx.moveTo(cx, e.y);
-  ctx.lineTo(e.x, e.y + fullHeight);
-  ctx.lineTo(e.x + fullSize, e.y + fullHeight);
-  ctx.closePath();
-  ctx.strokeStyle = e.color;
-  ctx.lineWidth = 2;
-  ctx.stroke();
-}
+  if (e.type === "hexagon") {
+    const radius = fullSize / 2;
+    ctx.beginPath();
+    for (let i = 0; i < 6; i++) {
+      const angle = (Math.PI / 3) * i - Math.PI / 2;
+      const x = radius * Math.cos(angle);
+      const y = radius * Math.sin(angle);
+      if (i === 0) ctx.moveTo(x, y); else ctx.lineTo(x, y);
+    }
+    ctx.closePath();
+    ctx.stroke();
 
-
+    const baseRadius = Math.max(3, radius - outlineInset);
+    if (health > 0) {
+      ctx.save();
+      ctx.scale(health, health);
+      ctx.shadowColor = e.color;
+      ctx.shadowBlur = 20;
+      ctx.fillStyle = e.color;
+      ctx.beginPath();
+      for (let i = 0; i < 6; i++) {
+        const angle = (Math.PI / 3) * i - Math.PI / 2;
+        const x = baseRadius * Math.cos(angle);
+        const y = baseRadius * Math.sin(angle);
+        if (i === 0) ctx.moveTo(x, y); else ctx.lineTo(x, y);
+      }
+      ctx.closePath();
+      ctx.fill();
+      ctx.restore();
+      ctx.shadowBlur = 0;
+      ctx.shadowColor = 'transparent';
+    }
+  }
 
   ctx.restore();
 }
@@ -106,7 +151,7 @@ export function moveEnemy() {
   enemy.forEach((e) => {
     const centerX = player.centerX;
     const centerY = player.centerY;
-    const speed = 0.2;
+    const speed = 0.2 / spaceTime.gameSpeed;
 
     if (!e.angle) {
       e.angle = Math.atan2(centerY - e.y, centerX - e.x);
@@ -126,9 +171,8 @@ export function moveEnemy() {
 
 export let moneyItem = [];
 
-// MODIFIED TEST PLEASE VVV
 export function enemyDropMoney(enemy) {
-  const numDrops = Math.floor(Math.random() * (enemy.maxHealth / 1.5)) + (enemy.maxHealth - 2);
+    const numDrops = Math.floor((Math.random() * enemy.dropAmount[1]) + enemy.dropAmount[0]);
 
   for (let i = 0; i < numDrops; i++) {
     const angle = Math.random() * Math.PI * 2;
@@ -140,7 +184,7 @@ export function enemyDropMoney(enemy) {
     dropX = Math.max(0, Math.min(canvas.width, dropX));
     dropY = Math.max(0, Math.min(canvas.height, dropY));
 
-    moneyItem.push({ x: dropX, y: dropY });
+    moneyItem.push({ x: dropX, y: dropY, value: (enemy.moneyValue * playerStats.moneyMultiplier) });
   }
 }
 
@@ -172,8 +216,10 @@ export function moveMoneyItems() {
 
 // scale damage based on enemy count
 export function scaleDamage() {
-  playerStats.healthDecreaseInt = 1 + (enemy.length * 0.025);
+  setTimeout(() => {
+  playerStats.healthDecreaseInt = 0.01 + (enemy.length * 0.0005);
   if (enemy.some(e => e.boss)) {
-    playerStats.healthDecreaseInt += 0.05;
+    playerStats.healthDecreaseInt += 0.0005;
   }
+}, 1000);
 }

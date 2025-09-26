@@ -1,100 +1,111 @@
-import { spawnEnemy } from "./enemy.js";
+import { spawnEnemy, scaleDamage } from "./enemy.js";
 import { playerStats, player } from "./player.js";
 import { spaceTime } from "./main.js";
 import { drawDeathOverlay, position } from "./skilltree.js";
 import { loadDramaticText } from "./textEffects.js";
 
-let timerInterval, healthInterval, squaresInterval, triangleInterval, bossSquareInterval, checkIfTabInterval, scaleDamageInterval;
+let timerTimeout, healthTimeout, squaresTimeout, triangleTimeout, hexagonTimeout, bossSquareTimeout, checkIfTabInterval, scaleDamageInterval;
 
-export function startIntervals(gameSpeed = 1) {
-    gameSpeed = Math.max(gameSpeed, 0.1);
-
-    //timer
-    timerInterval = setInterval(() => {
+export function startIntervals() {    
+    function timerTick() {
         if (!spaceTime.offTab) {
             player.time += 1;
         }
-    }, 1000 * gameSpeed);
+        timerTimeout = setTimeout(timerTick, 1000 * spaceTime.gameSpeed);
+    }
 
-    //check if the tab is open
-    checkIfTabInterval = setInterval(() => {
-        if (document.visibilityState === "visible") {
-            spaceTime.offTab = false;
-        } else {
-            spaceTime.offTab = true;
-        }
-    }, 1000 * gameSpeed);
-
-    //scale damage based off amount of enemies
-    scaleDamageInterval = setInterval(() => {
-        if (!spaceTime.offTab) {
-            scaleDamage();
-        }
-    }, 1000 * gameSpeed);
-
-    //base decrease player health
-    healthInterval = setInterval(() => {
+    function healthTick() {
         if (!spaceTime.offTab) {
             playerStats.health -= playerStats.healthDecreaseInt;
 
             if (playerStats.health <= 0) {
-                console.log("player health is 0");
                 drawDeathOverlay();
                 position[0] = player.centerX;
                 position[1] = player.centerY;
                 spaceTime.paused = true;
                 stopIntervals();
+                return;
             }
         }
-    }, playerStats.damageTickRate * gameSpeed);
+        healthTimeout = setTimeout(healthTick, playerStats.damageTickRate * spaceTime.gameSpeed);
+    }
 
-    //spawn enemys
-    squaresInterval = setInterval(() => {
+    function squaresTick() {
         if (!spaceTime.offTab) {
             if (player.time < 45) {
-                spawnEnemy("square", "red", 1, 50, 3);
+                spawnEnemy("square", "red", 1, 50, 3, [1, 2]);
+
                 setTimeout(() => {
-                    spawnEnemy("square", "red", 1, 100, 6);
-                }, 500 * gameSpeed);
-            }
-            if (player.time >= 45 && player.time < 150) {
+                    spawnEnemy("square", "red", 1, 100, 6, [3, 5]);
+                }, 500 * spaceTime.gameSpeed);
+
+            } else if (player.time >= 45 && player.time < 150) {
+
                 setTimeout(() => {
-                    spawnEnemy("square", "red", 1, 100, 12);
-                }, 500 * gameSpeed);
+                    spawnEnemy("square", "red", 1, 100, 12, [6, 10]);
+                }, 500 * spaceTime.gameSpeed);
+
             }
         }
-    }, 1000 * gameSpeed);
+        squaresTimeout = setTimeout(squaresTick, 1000 * spaceTime.gameSpeed);
+    }
 
-    triangleInterval = setInterval(() => {
+    function triangleTick() {
         if (!spaceTime.offTab) {
-            if (player.time >= 45) {
-                spawnEnemy("triangle", "purple", 1, 50, 15);
-            }
-            if (player.time >= 70) {
-                spawnEnemy("triangle", "gold", 1, 100, 25);
-            } 
-        }   
-    }, 2000 * gameSpeed);
+            if (player.time >= 45) spawnEnemy("triangle", "purple", 1, 50, 15, [11, 15]);
+            if (player.time >= 70) spawnEnemy("triangle", "gold", 1, 100, 25, [16, 25]);
+        }
+        triangleTimeout = setTimeout(triangleTick, 2000 * spaceTime.gameSpeed);
+    }
 
-    bossSquareInterval = setInterval(() => {
-        //first boss
+    function hexagonTick() {
+        if (!spaceTime.offTab) {
+            if (player.time >= 120) spawnEnemy("hexagon", "blue", 1, 100, 40, [26, 30]);
+        }
+        hexagonTimeout = setTimeout(hexagonTick, 3000 * spaceTime.gameSpeed);
+    }
+
+    function bossSquareTick() {
         if (!spaceTime.offTab) {
             if (player.time === 30) {
                 loadDramaticText("Big Cube");
-                spawnEnemy("square", "purple", 1, 300, 20, true);
+                spawnEnemy("square", "purple", 1, 300, 20, [20, 40], true);
             }
             if (player.time === 60) {
                 loadDramaticText("Panic Triangle");
-                spawnEnemy("triangle", "gold", 1, 500, 50, true);
+                spawnEnemy("triangle", "gold", 1, 500, 50, [40, 60], true);
+            }
+            if (player.time === 90) {
+                loadDramaticText("Hexagonal Horror");
+                spawnEnemy("hexagon", "blue", 1, 400, 100, [100, 100], true);
             }
         }
-    }, 1000 * gameSpeed);
+        bossSquareTimeout = setTimeout(bossSquareTick, 1000 * spaceTime.gameSpeed);
+    }
+
+    // start all ticks
+    timerTick();
+    healthTick();
+    squaresTick();
+    triangleTick();
+    hexagonTick();
+    bossSquareTick();
 }
 
 export function stopIntervals() {
-    clearInterval(timerInterval);
-    clearInterval(healthInterval);
-    clearInterval(squaresInterval);
-    clearInterval(triangleInterval);
-    clearInterval(bossSquareInterval);
+    clearTimeout(timerTimeout);
+    clearTimeout(healthTimeout);
+    clearTimeout(squaresTimeout);
+    clearTimeout(triangleTimeout);
+    clearTimeout(bossSquareTimeout);
 }
+
+scaleDamageInterval = setInterval (() => {
+    if (!spaceTime.offTab) {
+    scaleDamage();
+    }
+}, 1000);
+
+checkIfTabInterval = setInterval(() => {
+    spaceTime.offTab = document.visibilityState !== "visible";
+}, 1000);

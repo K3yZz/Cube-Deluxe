@@ -41,7 +41,7 @@ const skills = [
     amountAbtained: 0,
     description: "Increase Attack Speed",
     drawLinesTo: ["More Attack Speed II"],
-    icon: "null",
+    icon: "./assets/attackSpeedIconSkill.png",
     hoveringOverSkill: false,
     unlocked: false,
     costInflation: 2.33,
@@ -53,7 +53,7 @@ const skills = [
     maxAbtainable: 4,
     amountAbtained: 0,
     description: "Increase Attack Speed even more",
-    icon: "null",
+    icon: "./assets/attackSpeedIconSkill.png",
     drawLinesTo: [""],
     hoveringOverSkill: false,
     unlocked: false,
@@ -300,18 +300,16 @@ setTimeout(() => {
 
 function randomTipGenerator() {
   const tips = [
-    'Tip: You can drag the skill tree around!',
-    'Tip: "git gud" - Hornet',
-    'Tip: Vampire was free',
     "Tip: you're poor...",
     'Tip: WASD to move the skill tree',
     'Tip: Pressing Y lets you leave the match',
-    'Tip: yesnt',
+    'Tip: did you know.....',
   ];
   const randomIndex = Math.floor(Math.random() * tips.length);
   return tips[randomIndex];
 }
 
+export let drawSkillTreeAnimation;
 function draw() {
   ctx.setTransform(1, 0, 0, 1, 0, 0);
   ctx.clearRect(0, 0, canvas.width, canvas.height);
@@ -321,7 +319,7 @@ function draw() {
   ctx.translate(position[0], position[1]);
   drawSkills();
 
-  requestAnimationFrame(draw);
+  drawSkillTreeAnimation = requestAnimationFrame(draw);
 }
 
 const bgCanvas = UI.loadCanvas({
@@ -329,7 +327,6 @@ const bgCanvas = UI.loadCanvas({
   zIndex: '-999',
   pointerEvents: 'none',
 });
-bgCanvas.style.imageRendering = 'pixelated';
 
 const bgCtx = bgCanvas.getContext('2d');
 
@@ -401,8 +398,8 @@ function drawSkillConnections(skill) {
   }
 }
 
+const icon = new Image();
 function drawSkillBox(skill) {
-  const icon = new Image();
   icon.src = skill.icon;
 
   ctx.fillStyle = "rgb(0,0,0)";
@@ -417,8 +414,6 @@ function drawSkillBox(skill) {
   else if (affordable) borderStrokeColor = "rgb(64, 240, 143)";
 
   ctx.strokeStyle = borderStrokeColor;
-  ctx.shadowColor = borderStrokeColor;
-  ctx.shadowBlur = 2;
   ctx.strokeRect(skill.pos[0] - 32, skill.pos[1] - 32, 64, 64);
 }
 

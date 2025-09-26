@@ -1,3 +1,4 @@
+import { spaceTime } from "./main.js";
 import { loadCanvas } from "./UI.js";
 
 const canvas = loadCanvas({ zIndex: '2' });
@@ -110,7 +111,7 @@ export function scaleBackground() {
             player.backgroundScalingOpacity = .05;
         }
         scaleBackground();
-    }, player.backgroundOpacityChangeSpeed);
+    }, player.backgroundOpacityChangeSpeed * spaceTime.gameSpeed);
 }
 
 export function drawTimer() {

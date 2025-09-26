@@ -6,12 +6,30 @@
     <title>Cube Deluxe (DEBUG)</title>
 </head>
 <body></body>
+<script src="./simplex-noise.js"></script>
 <script src=main.js type="module"></script>
 <script type="module">
     import { spaceTime } from './main.js';
     import { player, playerStats } from './player.js';
     import { enemy, moneyItem } from './enemy.js';
-    import { startIntervals, stopIntervals } from './interval.js';
+    let fps = 0;
+
+    let lastFrameTime = performance.now();
+    let frames = 0;
+
+    function update() {
+        const now = performance.now();
+        frames++;
+
+        if (now - lastFrameTime >= 1000) {
+            fps = frames;
+            frames = 0;
+            lastFrameTime = now;
+        }
+
+        requestAnimationFrame(update);
+    }
+    requestAnimationFrame(update);
 
     function loadDebugInfo() {
     const debugInfo = document.createElement('div');
@@ -70,11 +88,9 @@
     }
     addDebugButton('Pause Game', () => {
         spaceTime.paused = true;
-        startIntervals();
     });
     addDebugButton('Resume Game', () => {
         spaceTime.paused = false;
-        stopIntervals();
     });
     addDebugButton('Add 10000 Money', () => {
         playerStats.money += 10000;
@@ -85,7 +101,12 @@
     addDebugButton('Clear Money Items', () => {
         if (Array.isArray(moneyItem)) moneyItem.length = 0;
     });
-
+    addDebugButton('slow game speed', () => {
+        spaceTime.gameSpeed += 0.1;
+    });
+    addDebugButton('speed up game speed', () => {
+        spaceTime.gameSpeed -= 0.1;
+    });
     let currentEnemyPage = 0;
     const ENEMIES_PER_PAGE = 3;
     let currentMoneyPage = 0;
@@ -129,6 +150,7 @@
                         <div>Position: ${Math.round(en.x)}, ${Math.round(en.y)}</div>
                         <div>Size: ${en.size}</div>
                         <div>Health: ${en.health}/${en.maxHealth}</div>
+                        <div>Drop Amount: ${en.dropAmount}</div>
                         <div>Boss: ${en.boss}</div>
                         <div>Type: ${en.type}</div>
                         <div>Color: ${en.color}</div>
@@ -166,6 +188,7 @@
                     moneyItemInfo += `
                         <div style="margin-top:6px;"><b>Money Item #${idx + 1}</b></div>
                         <div>Position: ${Math.round(mi.x)}, ${Math.round(mi.y)}</div>
+                        <div>Value: ${mi.value}</div>
                     `;
                 }
                 moneyItemInfo += `
@@ -191,6 +214,8 @@
                 <div>Off Tab: <span id="gameOffTab">${spaceTime.offTab}</span></div>
                 <div>Skill Tree Open: <span id="skillTreeOpen">${spaceTime.skillTreeOpen}</span></div>
                 <div>Ran Once: <span id="ranOnce">${spaceTime.ranOnce}</span></div>
+                <div>FPS: <span id="fps">${fps}</span></div>
+                <div>Game Speed: <span id="gameSpeed">${spaceTime.gameSpeed.toFixed(2)}</span></div>
             `;
         } else if (select.value === 'debug') {
             infoContainer.innerHTML = `<div style="font-weight:bold;">Debug Tools:</div>`;
@@ -214,7 +239,7 @@
     window.addEventListener('load', () => {
         setTimeout(() => {
             loadDebugInfo();
-        }, 2000);
+        }, 100);
     }); 
 </script>
 </html>

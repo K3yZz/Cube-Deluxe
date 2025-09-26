@@ -39,7 +39,7 @@ Object.assign(startButton.style, {
   textAlign: "center",
   zIndex: -10,
 });
-startButton.innerText = "Deploy";
+startButton.innerText = "-->";
 startButton.onclick = startGame;
 startButton.onmouseover = () => {startButton.style.backgroundColor = "rgba(30, 36, 37, 0.9)";}
 startButton.onmouseout = () => {startButton.style.backgroundColor = "rgba(30, 36, 37, 0.75)";}
@@ -83,7 +83,7 @@ Object.assign(againButton.style, {
   textAlign: "center",
   zIndex: -10,
 });
-againButton.innerText = "Deploy";
+againButton.innerText = "-->";
 againButton.onclick = startGame;
 againButton.onmouseover = () => {againButton.style.backgroundColor = "rgba(11, 200, 233, 0.9)";}
 againButton.onmouseout = () => {againButton.style.backgroundColor = "rgba(11, 200, 233, 0.75)";}

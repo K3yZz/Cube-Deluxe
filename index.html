@@ -6,7 +6,58 @@
     <title>Cube Deluxe</title>
 </head>
 <body>
+    <div>
+        <span id="titleText">Cube Deluxe</span>
+        <span id="versionText">V1.6.1.0 - Alpha</span>
+        <style>
+            #titleText {
+                font-size: 32px;
+                font-family: 'font', sans-serif;
+                position: absolute;
+                top: 40%;
+                left: 50%;
+                transform: translate(-50%, -50%);
+                z-index: 1000;
+            }
+            #versionText {
+                font-size: 16px;
+                font-family: 'font', sans-serif;
+                position: absolute;
+                top: 50%;
+                left: 50%;
+                transform: translate(-50%, -50%);
+                z-index: 1000;
+            }
+        </style>
+    </div>
+    <script type="module">
+        import { animateText } from './textEffects.js';
 
+        const myFont = new FontFace("font", "url('assets/font.ttf')");
+        myFont.load().then((loadedFont) => {
+            document.fonts.add(loadedFont);
+        });
+        
+        const startGameButton = document.createElement('button');
+        startGameButton.textContent = 'Start Game';
+        startGameButton.id = 'startGameButton';
+        startGameButton.style.fontSize = '24px';
+        startGameButton.style.fontFamily = 'font, sans-serif';
+        startGameButton.style.border = 'none';
+        startGameButton.style.padding = '10px 20px';
+        startGameButton.style.position = 'absolute';
+        startGameButton.style.top = '60%';
+        startGameButton.style.left = '50%';
+        startGameButton.style.transform = 'translate(-50%, -50%)';
+        startGameButton.style.zIndex = 1000;
+
+
+        startGameButton.onclick = () => {
+            window.location.href = 'game.html';
+        };
+        document.body.appendChild(startGameButton);
+        animateText(document.getElementById('startGameButton'), { wavy: true });
+        
+    </script>
 </body>
-<script src="./main.js" type="module"></script>
 </html>
